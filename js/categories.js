@@ -165,3 +165,9 @@ export const ALBUM_TEAM = {
   '72177720323715123': 'canucks',
   '72177720313537886': 'canucks',
 };
+
+// Category slug -> album id whose cover photo should represent that
+// category's tile on the home page. Unset categories fall back to the
+// first album found in that category. Set/edit via admin.html.
+export const CATEGORY_COVERS = {
+};

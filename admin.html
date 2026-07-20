@@ -38,12 +38,13 @@
       <p style="color: var(--grey); font-size: 0.85rem; margin-bottom: 1rem;">
         Tag each album's category, and — for NHL / Non-NHL — its team.
         Optionally give it a friendlier display title/description. Click
-        "Copy config" and paste the result over <code>ALBUM_CATEGORIES</code>
-        and <code>ALBUM_TEAM</code> in <code>js/categories.js</code>, and
-        <code>ALBUM_META</code> in <code>js/album-meta.js</code>. Your picks
-        are saved in this browser as you go, so it's safe to leave and come
-        back.
+        "Copy config" and paste the result over <code>ALBUM_CATEGORIES</code>,
+        <code>ALBUM_TEAM</code>, and <code>CATEGORY_COVERS</code> in
+        <code>js/categories.js</code>, and <code>ALBUM_META</code> in
+        <code>js/album-meta.js</code>. Your picks are saved in this browser
+        as you go, so it's safe to leave and come back.
       </p>
+      <div id="category-covers" style="margin-bottom: 1.5rem;"></div>
       <textarea id="output" readonly></textarea>
       <div class="grid" id="grid">Loading…</div>
     </div>
@@ -51,7 +52,7 @@
 
   <script type="module">
     import { getAlbums } from './js/flickr.js';
-    import { CATEGORIES, ALBUM_CATEGORIES, ALBUM_TEAM } from './js/categories.js';
+    import { CATEGORIES, ALBUM_CATEGORIES, ALBUM_TEAM, CATEGORY_COVERS } from './js/categories.js';
     import { TEAMS } from './js/teams.js';
     import { ALBUM_META } from './js/album-meta.js';
     import { ADMIN_PASSWORD_HASH } from './js/admin-auth.js';
@@ -95,12 +96,15 @@
       const CAT_KEY = 'flickr-admin-assignments';
       const TEAM_KEY = 'flickr-admin-team-assignments';
       const META_KEY = 'flickr-admin-meta';
+      const COVER_KEY = 'flickr-admin-category-covers';
       const savedCats = JSON.parse(localStorage.getItem(CAT_KEY) || '{}');
       const savedTeams = JSON.parse(localStorage.getItem(TEAM_KEY) || '{}');
       const savedMeta = JSON.parse(localStorage.getItem(META_KEY) || '{}');
+      const savedCovers = JSON.parse(localStorage.getItem(COVER_KEY) || '{}');
       const assignments = { ...ALBUM_CATEGORIES, ...savedCats };
       const teamAssignments = { ...ALBUM_TEAM, ...savedTeams };
       const metaAssignments = { ...ALBUM_META, ...savedMeta };
+      const categoryCovers = { ...CATEGORY_COVERS, ...savedCovers };
 
       const grid = document.getElementById('grid');
       const status = document.getElementById('status');
@@ -115,6 +119,31 @@
           if (!assignments[a.id] && /^K\s/.test(a.title)) assignments[a.id] = 'wife-jerseys';
         }
         localStorage.setItem(CAT_KEY, JSON.stringify(assignments));
+
+        const coversEl = document.getElementById('category-covers');
+        coversEl.innerHTML = `<p class="section-label" style="margin-bottom:0.5rem;">Category covers (home page tiles)</p>` +
+          CATEGORIES.map((c) => {
+            const inCat = albums.filter((a) => assignments[a.id] === c.slug);
+            const options = inCat.map((a) => `<option value="${a.id}" ${categoryCovers[c.slug] === a.id ? 'selected' : ''}>${a.title}</option>`).join('');
+            return `
+              <label style="display:inline-block; margin: 0 1rem 0.75rem 0; vertical-align: top;">
+                <span class="section-label" style="display:block; margin-bottom:0.25rem;">${c.label}</span>
+                <select class="admin-field cover-select" data-cat="${c.slug}" style="min-width: 220px; margin-top: 0;">
+                  <option value="">Auto (first album)</option>
+                  ${options}
+                </select>
+              </label>
+            `;
+          }).join('');
+
+        for (const sel of coversEl.querySelectorAll('.cover-select')) {
+          sel.addEventListener('change', () => {
+            const cat = sel.dataset.cat;
+            if (sel.value) categoryCovers[cat] = sel.value;
+            else delete categoryCovers[cat];
+            localStorage.setItem(COVER_KEY, JSON.stringify(categoryCovers));
+          });
+        }
 
         grid.innerHTML = albums.map((a) => `
           <div class="admin-card" data-id="${a.id}">
@@ -180,8 +209,9 @@
       document.getElementById('copy').addEventListener('click', async () => {
         const catLines = Object.entries(assignments).map(([id, cat]) => `  '${id}': '${cat}',`).join('\n');
         const teamLines = Object.entries(teamAssignments).map(([id, team]) => `  '${id}': '${team}',`).join('\n');
+        const coverLines = Object.entries(categoryCovers).map(([slug, id]) => `  '${slug}': '${id}',`).join('\n');
         const metaLines = Object.entries(metaAssignments).map(([id, m]) => `  '${id}': ${JSON.stringify(m)},`).join('\n');
-        const code = `export const ALBUM_CATEGORIES = {\n${catLines}\n};\n\nexport const ALBUM_TEAM = {\n${teamLines}\n};\n\n// -- paste into js/album-meta.js --\nexport const ALBUM_META = {\n${metaLines}\n};`;
+        const code = `export const ALBUM_CATEGORIES = {\n${catLines}\n};\n\nexport const ALBUM_TEAM = {\n${teamLines}\n};\n\nexport const CATEGORY_COVERS = {\n${coverLines}\n};\n\n// -- paste into js/album-meta.js --\nexport const ALBUM_META = {\n${metaLines}\n};`;
         const btn = document.getElementById('copy');
         const output = document.getElementById('output');
 

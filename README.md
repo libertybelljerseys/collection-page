@@ -57,11 +57,14 @@ photos at the time of writing, well under GitHub Pages' 1GB soft limit).
 5. Go to `/admin.html` (password gate is skipped locally as long as
    `js/admin-auth.js` has an empty hash, which it does by default — see
    Deploy below). Tag each album's category, and — for NHL albums — pick a
-   team. Optionally give an album a friendlier display title/description.
-   Click "Copy config" and paste the result over `ALBUM_CATEGORIES` and
-   `ALBUM_TEAM` in `js/categories.js`, and `ALBUM_META` in
-   `js/album-meta.js`. Untagged albums show up under "Uncategorized" (or
-   "Unassigned" within the NHL team split) so nothing gets lost. Albums
+   team. Optionally give an album a friendlier display title/description,
+   or pick which album represents each category's home-page tile (defaults
+   to the first album in that category — the "Category covers" pickers at
+   the top of the page). Click "Copy config" and paste the result over
+   `ALBUM_CATEGORIES`, `ALBUM_TEAM`, and `CATEGORY_COVERS` in
+   `js/categories.js`, and `ALBUM_META` in `js/album-meta.js`. Untagged
+   albums show up under "Uncategorized" (or "Unassigned" within the NHL
+   team split) so nothing gets lost. Albums
    titled "K ..." auto-tag to Wife Jerseys.
 
 ## Deploy
@@ -150,8 +153,8 @@ that):
 - `.github/workflows/deploy.yml` — builds config.js/admin-auth.js/data from
   secrets, on push and on a daily schedule, and publishes to GitHub Pages
 - `CNAME` — custom domain for GitHub Pages
-- `js/categories.js` — category list + album→category/team mappings (edit
-  this after using admin.html)
+- `js/categories.js` — category list, album→category/team mappings, and
+  per-category home-page cover overrides (edit this after using admin.html)
 - `js/album-meta.js` — optional per-album title/description overrides (edit
   this after using admin.html)
 - `js/teams.js` — the NHL teams (slug, label, color, logo)

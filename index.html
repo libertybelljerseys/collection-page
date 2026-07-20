@@ -39,7 +39,7 @@
 
   <script type="module">
     import { getAlbums } from './js/data.js';
-    import { CATEGORIES, ALBUM_CATEGORIES } from './js/categories.js';
+    import { CATEGORIES, ALBUM_CATEGORIES, CATEGORY_COVERS } from './js/categories.js';
 
     const el = document.getElementById('categories');
     try {
@@ -54,7 +54,8 @@
 
       el.innerHTML = CATEGORIES.map((c) => {
         const list = byCategory[c.slug];
-        const cover = list[0]?.cover;
+        const overrideAlbum = albums.find((a) => a.id === CATEGORY_COVERS[c.slug]);
+        const cover = overrideAlbum?.cover || list[0]?.cover;
         return `
           <a class="tile${cover ? '' : ' no-cover'}" href="category.html?cat=${c.slug}">
             ${cover ? `<img src="${cover}" alt="" loading="lazy">` : ''}
