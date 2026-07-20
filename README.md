@@ -135,10 +135,16 @@ that):
   custom titles/descriptions, reading live from Flickr
 - `js/no-save.js` — blocks the right-click context menu on images (public
   pages only); basic friction, not real protection
-- `.wm-pattern`/`.wm-logo` (in `css/style.css`, used across index/category/
-  album) — display-only watermark: a repeating diagonal "LIBERTY BELL
-  JERSEYS" text (`logos/watermark-pattern.svg`) and a bottom-right corner
-  logo (`logos/lbj_patch_bolt.png`), both CSS overlays. Same caveat as
+- `.wm-pattern`/`.wm-logo` (in `css/style.css`) — display-only watermark on
+  the actual jersey photos (album thumbnails + lightbox only — not the
+  navigational tiles/cards on the home and category pages): a repeating
+  diagonal "LIBERTY BELL JERSEYS" text (`logos/watermark-pattern.svg`) and
+  a bottom-right corner logo (`logos/watermark-logo.png` — a recolored copy
+  of the LBJ patch/bolt mark, black background made transparent and the
+  orange stripe made white so it reads on dark photo backgrounds; to
+  regenerate from a source logo:
+  `magick source.png -fuzz 20% -transparent black -fuzz 35% -fill white -opaque red watermark-logo.png`).
+  Same caveat as
   `no-save.js`: this doesn't touch the actual image files in `data/`, so
   anyone who gets the raw file gets it unwatermarked — it's deterrence, not
   baked into the pixels. Baking it in for real would mean re-encoding every
