@@ -222,7 +222,7 @@ main {
   inset: -30%;
   background-image: url('../logos/watermark-pattern.svg');
   background-repeat: repeat;
-  background-size: 220px auto;
+  background-size: 320px auto;
   transform: rotate(-28deg);
   pointer-events: none;
 }
@@ -234,7 +234,7 @@ main {
   background-repeat: no-repeat;
   background-position: bottom 4% right 4%;
   background-size: clamp(36px, 16%, 90px) auto;
-  opacity: 0.55;
+  opacity: 0.4;
   pointer-events: none;
 }
 
@@ -274,6 +274,8 @@ main {
   display: inline-block;
   line-height: 0;
   max-width: 100%;
+  overflow: hidden;
+  border-radius: 4px;
 }
 
 #lightbox img {
