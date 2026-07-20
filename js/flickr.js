@@ -35,7 +35,7 @@ export async function getAlbumPhotos(id) {
   const data = await call('flickr.photosets.getPhotos', {
     photoset_id: id,
     user_id: FLICKR_CONFIG.userId,
-    extras: 'url_q,url_c,url_l,url_h,url_k,url_o',
+    extras: 'url_q,url_c,url_l,url_h,url_k',
   });
   return {
     title: data.photoset.title,
@@ -43,7 +43,11 @@ export async function getAlbumPhotos(id) {
       id: p.id,
       title: p.title,
       thumb: p.url_q,
-      full: p.url_o || p.url_k || p.url_h || p.url_l || p.url_c || p.url_q,
+      // Caps at url_k (2048px). Deliberately never requests url_o (the
+      // original file) — Flickr rate-limits original-file requests much
+      // more aggressively than its standard derivative sizes, which is
+      // what caused 429s on the lightbox.
+      full: p.url_k || p.url_h || p.url_l || p.url_c || p.url_q,
     })),
   };
 }

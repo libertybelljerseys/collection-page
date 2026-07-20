@@ -20,11 +20,37 @@ img {
 body {
   margin: 0;
   background: var(--navy);
+  background-image: url('../backgrounds/texture.jpg');
+  background-size: cover;
+  background-position: center top;
+  background-attachment: fixed;
   color: var(--cream);
   font-family: 'Barlow', sans-serif;
+  min-height: 100vh;
+}
+
+/* Dark overlay to keep text readable over the texture */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(
+    160deg,
+    rgba(15, 18, 22, 0.72) 0%,
+    rgba(20, 24, 30, 0.60) 40%,
+    rgba(10, 14, 18, 0.78) 100%
+  );
+  pointer-events: none;
+  z-index: 0;
 }
 
 a { color: inherit; }
+
+/* Real content sits above the fixed overlay pseudo-element */
+.site-header, .page-title-block, main, .site-footer {
+  position: relative;
+  z-index: 1;
+}
 
 /* ── Top brand bar ─────────────────────────────── */
 .site-header {
@@ -202,11 +228,12 @@ main {
   display: none;
   position: fixed;
   inset: 0;
+  z-index: 10;
   background: rgba(10, 13, 16, 0.92);
   align-items: center;
   justify-content: center;
   padding: 2rem;
-  cursor: zoom-out;
+  cursor: pointer;
 }
 
 #lightbox.open { display: flex; }
@@ -392,4 +419,30 @@ main {
   padding: 0.85rem;
   font-family: monospace;
   font-size: 0.85rem;
+}
+
+/* ── Footer ─────────────────────────────────────── */
+.site-footer {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 48px 24px 32px;
+  text-align: center;
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  color: var(--grey);
+}
+
+.site-footer a {
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.site-footer a:hover { color: var(--orange); }
+
+.footer-disclaimer {
+  margin: 16px auto 0;
+  max-width: 480px;
+  font-size: 10px;
+  line-height: 1.6;
+  color: #5a646d;
 }

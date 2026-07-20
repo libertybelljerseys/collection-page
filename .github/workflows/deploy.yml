@@ -4,8 +4,11 @@ on:
   push:
     branches: [main]
   schedule:
-    # Refresh the Flickr data snapshot every 6 hours, independent of pushes.
-    - cron: '0 */6 * * *'
+    # Refresh the Flickr data snapshot (including downloaded images) once a
+    # day. Low-traffic, infrequently-updated site — daily is plenty, and
+    # keeps CI time/bandwidth down now that this build downloads every
+    # photo, not just JSON. Use "Run workflow" for an on-demand refresh.
+    - cron: '0 6 * * *'
   workflow_dispatch:
 
 permissions:

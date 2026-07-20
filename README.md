@@ -8,14 +8,22 @@ automatically). Styled to match libertybelljerseys.com's other pages
 
 ## How data flows
 
-The public pages (`index.html`, `category.html`, `album.html`) never call
-the Flickr API themselves — they read a static JSON snapshot in `data/`
-(one `data/albums.json` plus one `data/albums/<id>.json` per album),
-fetched with a short sessionStorage cache on top so repeat navigation
-within a visit is instant. That snapshot is written by
-`scripts/fetch-data.mjs`, which does call the live Flickr API — it runs in
-CI on every deploy and every 6 hours on a schedule (see
-`.github/workflows/deploy.yml`), and you can run it locally too.
+The public pages (`index.html`, `category.html`, `album.html`) never talk
+to Flickr at all, not even for images — they read a fully self-contained
+static snapshot in `data/`: JSON (`data/albums.json` plus one
+`data/albums/<id>.json` per album) and the actual image files
+(`data/images/covers/`, `data/images/photos/`, capped at 2048px — Flickr's
+`_k` size — never the original file). A short sessionStorage cache sits on
+top of the JSON fetches so repeat navigation within a visit is instant.
+
+That snapshot is built by `scripts/fetch-data.mjs`, which does call the
+live Flickr API and download every image — it runs in CI on every deploy
+and once a day on a schedule (see `.github/workflows/deploy.yml`), and you
+can run it locally too. This exists because Flickr rate-limits (429s)
+image requests, especially the original file, more aggressively than a
+live per-visitor integration can tolerate; baking everything into the
+deploy sidesteps that entirely. It also means the site keeps working even
+if Flickr is slow, down, or later closes off hotlinking.
 
 `admin.html` is the one exception: it calls the Flickr API live
 (`js/flickr.js`) so sorting/tagging always reflects the current state of
@@ -24,7 +32,12 @@ immediately, instead of waiting for the next snapshot refresh).
 
 Net effect: the Flickr API key only ever needs to exist in two places — the
 CI environment (to build the snapshot) and the gated `/admin.html` page
-(for live editing). The fully public pages ship zero Flickr credentials.
+(for live editing). The fully public pages ship zero Flickr credentials and
+make zero requests to Flickr.
+
+`data/` is gitignored — none of this ever gets committed. It's regenerated
+by CI into the Pages deployment each run (~430MB for ~103 albums/540
+photos at the time of writing, well under GitHub Pages' 1GB soft limit).
 
 ## Setup
 
@@ -71,11 +84,13 @@ plain branch deploy, so secrets never have to live in the repo:
    `js/admin-auth.js` from the secrets, runs `scripts/fetch-data.mjs` to
    build the `data/` snapshot, then publishes everything.
 
-The workflow also runs on a `schedule` (every 6 hours) and can be triggered
+The workflow also runs on a `schedule` (once a day) and can be triggered
 any time from the Actions tab ("Run workflow") — that's how the public
 gallery picks up changes made on Flickr (new/deleted albums, retagged
 photos) without a code push. `/admin.html` always reflects Flickr
-immediately regardless, since it bypasses the snapshot.
+immediately regardless, since it bypasses the snapshot. Daily (not more
+often) because this build now downloads every image, not just JSON — no
+need to run it more than the site actually changes.
 
 Note on what the secret injection buys `FLICKR_API_KEY`/`FLICKR_USER_ID`:
 they're only ever used by CI (to build the snapshot) and by `/admin.html`
@@ -115,19 +130,25 @@ that):
   navigation) for one album; shows a custom title/description if set
 - `admin.html` — password-gated; tag albums into categories/teams and set
   custom titles/descriptions, reading live from Flickr
+- `js/no-save.js` — blocks the right-click context menu on images (public
+  pages only); basic friction, not real protection
 - `js/data.js` — what the public pages use to read `data/`, with a 5-minute
   sessionStorage cache
 - `js/flickr.js` — live Flickr API calls, used by `admin.html` and by
-  `scripts/fetch-data.mjs`; requests the largest available image size
-- `scripts/fetch-data.mjs` — Node script that writes the `data/` snapshot
-- `data/` — generated, gitignored; the static snapshot public pages read
+  `scripts/fetch-data.mjs`; caps images at url_k (2048px), never the
+  original file
+- `scripts/fetch-data.mjs` — Node script that writes the `data/` snapshot,
+  including downloading every image (with 429 retry/backoff and a small
+  concurrency limit, since Flickr does rate-limit this)
+- `data/` — generated, gitignored; the static snapshot (JSON + images)
+  public pages read
 - `js/config.js` — API key + Flickr user id (gitignored; generated locally
   from `config.example.js`, or by the deploy workflow in CI)
 - `js/config.example.js` — checked-in template for the above
 - `js/admin-auth.js` — SHA-256 hash of the admin password (safe to commit;
   overwritten by CI from the `ADMIN_PASSWORD_HASH` secret)
 - `.github/workflows/deploy.yml` — builds config.js/admin-auth.js/data from
-  secrets, on push and on a 6-hour schedule, and publishes to GitHub Pages
+  secrets, on push and on a daily schedule, and publishes to GitHub Pages
 - `CNAME` — custom domain for GitHub Pages
 - `js/categories.js` — category list + album→category/team mappings (edit
   this after using admin.html)
@@ -135,7 +156,13 @@ that):
   this after using admin.html)
 - `js/teams.js` — the NHL teams (slug, label, color, logo)
 - `logos/teams/` — team crest PNGs (pulled from the lbj-status project's asset set)
+- `backgrounds/texture.jpg` — same background texture as status.libertybelljerseys.com
 
 Category tiles and team tiles show a preview image (a representative album
 cover, or the team crest) so there's something to look at while browsing —
 no more blank tiles.
+
+The header logo links out to libertybelljerseys.com (new tab) on every
+page. The footer (public pages only, not `/admin.html`) links to
+libertybelljerseys.com, Instagram, and a contact email, plus the standard
+team-logo disclaimer reused from lbj-status.
