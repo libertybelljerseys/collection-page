@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Liberty Bell Jerseys</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html">
+      <img class="brand-logo" src="https://images.squarespace-cdn.com/content/v1/5fa5834cd658574ae3274684/cb3a1a1e-fce3-4d90-b3bb-739c8451524d/lbj_patch_bolt.png?format=300w" alt="">
+      <span class="brand-name">Liberty Bell Jerseys</span>
+    </a>
+    <nav class="breadcrumb"><a href="index.html">Home</a> / <span id="crumb-title">…</span></nav>
+  </header>
+
+  <div class="page-title-block">
+    <p class="eyebrow">Album</p>
+    <h1 class="page-title" id="title">…</h1>
+    <div class="title-divider"></div>
+    <p class="album-description" id="description" style="display:none"></p>
+  </div>
+
+  <main>
+    <div class="grid" id="grid">Loading…</div>
+  </main>
+
+  <div id="lightbox">
+    <button id="lb-prev" class="lb-nav lb-prev" aria-label="Previous photo">&#8249;</button>
+    <img alt="">
+    <button id="lb-next" class="lb-nav lb-next" aria-label="Next photo">&#8250;</button>
+  </div>
+
+  <script type="module">
+    import { getAlbumPhotos } from './js/flickr.js';
+    import { ALBUM_META } from './js/album-meta.js';
+
+    const grid = document.getElementById('grid');
+    const id = new URLSearchParams(location.search).get('id');
+
+    try {
+      const { title, photos } = await getAlbumPhotos(id);
+      const meta = ALBUM_META[id];
+      const displayTitle = meta?.title || title;
+
+      document.getElementById('title').textContent = displayTitle;
+      document.getElementById('crumb-title').textContent = displayTitle;
+      document.title = `${displayTitle} — Liberty Bell Jerseys`;
+      if (meta?.description) {
+        const desc = document.getElementById('description');
+        desc.textContent = meta.description;
+        desc.style.display = 'block';
+      }
+
+      grid.innerHTML = photos.map((p, i) => `
+        <a href="${p.full}" data-index="${i}" class="photo" title="${p.title}">
+          <img src="${p.thumb}" alt="${p.title}" loading="lazy">
+        </a>
+      `).join('');
+
+      const lightbox = document.getElementById('lightbox');
+      const lightboxImg = lightbox.querySelector('img');
+      let current = 0;
+
+      function showPhoto(i) {
+        current = (i + photos.length) % photos.length;
+        lightboxImg.src = photos[current].full;
+        lightboxImg.alt = photos[current].title;
+      }
+
+      grid.addEventListener('click', (e) => {
+        const a = e.target.closest('.photo');
+        if (!a) return;
+        e.preventDefault();
+        showPhoto(Number(a.dataset.index));
+        lightbox.classList.add('open');
+      });
+
+      document.getElementById('lb-prev').addEventListener('click', (e) => {
+        e.stopPropagation();
+        showPhoto(current - 1);
+      });
+      document.getElementById('lb-next').addEventListener('click', (e) => {
+        e.stopPropagation();
+        showPhoto(current + 1);
+      });
+      lightbox.addEventListener('click', () => lightbox.classList.remove('open'));
+
+      document.addEventListener('keydown', (e) => {
+        if (!lightbox.classList.contains('open')) return;
+        if (e.key === 'ArrowLeft') showPhoto(current - 1);
+        else if (e.key === 'ArrowRight') showPhoto(current + 1);
+        else if (e.key === 'Escape') lightbox.classList.remove('open');
+      });
+    } catch (err) {
+      grid.innerHTML = `<p class="error">${err.message}. Add your Flickr API key to js/config.js.</p>`;
+    }
+  </script>
+</body>
+</html>

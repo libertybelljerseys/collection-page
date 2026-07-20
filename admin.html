@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex, nofollow">
+  <title>Sort Albums — Liberty Bell Jerseys</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html">
+      <img class="brand-logo" src="https://images.squarespace-cdn.com/content/v1/5fa5834cd658574ae3274684/cb3a1a1e-fce3-4d90-b3bb-739c8451524d/lbj_patch_bolt.png?format=300w" alt="">
+      <span class="brand-name">Liberty Bell Jerseys</span>
+    </a>
+    <nav class="breadcrumb"><a href="index.html">Home</a> / Sort Albums</nav>
+  </header>
+
+  <div class="page-title-block">
+    <p class="eyebrow">Admin</p>
+    <h1 class="page-title">Sort <em>Albums</em></h1>
+    <div class="title-divider"></div>
+  </div>
+
+  <main>
+    <div id="auth-gate" class="auth-gate" style="display:none">
+      <input type="password" id="auth-input" placeholder="Password">
+      <button id="auth-submit" class="btn-primary">Unlock</button>
+      <p id="auth-error" class="error" style="display:none; margin-top: 0.75rem;">Incorrect password.</p>
+    </div>
+
+    <div id="admin-content" style="display:none">
+      <div id="toolbar">
+        <button id="copy" class="btn-primary">Copy config</button>
+        <span id="status" class="section-label"></span>
+      </div>
+      <p style="color: var(--grey); font-size: 0.85rem; margin-bottom: 1rem;">
+        Tag each album's category, and — for NHL / Non-NHL — its team.
+        Optionally give it a friendlier display title/description. Click
+        "Copy config" and paste the result over <code>ALBUM_CATEGORIES</code>
+        and <code>ALBUM_TEAM</code> in <code>js/categories.js</code>, and
+        <code>ALBUM_META</code> in <code>js/album-meta.js</code>. Your picks
+        are saved in this browser as you go, so it's safe to leave and come
+        back.
+      </p>
+      <textarea id="output" readonly></textarea>
+      <div class="grid" id="grid">Loading…</div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { getAlbums } from './js/flickr.js';
+    import { CATEGORIES, ALBUM_CATEGORIES, ALBUM_TEAM } from './js/categories.js';
+    import { TEAMS } from './js/teams.js';
+    import { ALBUM_META } from './js/album-meta.js';
+    import { ADMIN_PASSWORD_HASH } from './js/admin-auth.js';
+
+    async function sha256(text) {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+      return [...new Uint8Array(buf)].map((b) => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    const SESSION_KEY = 'admin-authed';
+    const gate = document.getElementById('auth-gate');
+    const content = document.getElementById('admin-content');
+
+    function grant() {
+      gate.style.display = 'none';
+      content.style.display = 'block';
+      initAdmin();
+    }
+
+    if (!ADMIN_PASSWORD_HASH) {
+      grant();
+    } else if (sessionStorage.getItem(SESSION_KEY) === '1') {
+      grant();
+    } else {
+      gate.style.display = 'block';
+      const input = document.getElementById('auth-input');
+      const error = document.getElementById('auth-error');
+      const tryUnlock = async () => {
+        if ((await sha256(input.value)) === ADMIN_PASSWORD_HASH) {
+          sessionStorage.setItem(SESSION_KEY, '1');
+          grant();
+        } else {
+          error.style.display = 'block';
+        }
+      };
+      document.getElementById('auth-submit').addEventListener('click', tryUnlock);
+      input.addEventListener('keydown', (e) => { if (e.key === 'Enter') tryUnlock(); });
+    }
+
+    async function initAdmin() {
+      const CAT_KEY = 'flickr-admin-assignments';
+      const TEAM_KEY = 'flickr-admin-team-assignments';
+      const META_KEY = 'flickr-admin-meta';
+      const savedCats = JSON.parse(localStorage.getItem(CAT_KEY) || '{}');
+      const savedTeams = JSON.parse(localStorage.getItem(TEAM_KEY) || '{}');
+      const savedMeta = JSON.parse(localStorage.getItem(META_KEY) || '{}');
+      const assignments = { ...ALBUM_CATEGORIES, ...savedCats };
+      const teamAssignments = { ...ALBUM_TEAM, ...savedTeams };
+      const metaAssignments = { ...ALBUM_META, ...savedMeta };
+
+      const grid = document.getElementById('grid');
+      const status = document.getElementById('status');
+
+      const teamOptions = TEAMS.map((t) => `<option value="${t.slug}">${t.label}</option>`).join('');
+
+      try {
+        const albums = await getAlbums();
+        status.textContent = `${albums.length} albums`;
+
+        for (const a of albums) {
+          if (!assignments[a.id] && /^K\s/.test(a.title)) assignments[a.id] = 'wife-jerseys';
+        }
+        localStorage.setItem(CAT_KEY, JSON.stringify(assignments));
+
+        grid.innerHTML = albums.map((a) => `
+          <div class="admin-card" data-id="${a.id}">
+            <img src="${a.cover}" alt="" loading="lazy">
+            <div class="admin-info">
+              <p>${a.title} <span class="muted">(${a.count})</span></p>
+              <div class="btn-row">
+                ${CATEGORIES.map((c) => `<button data-cat="${c.slug}" class="${assignments[a.id] === c.slug ? 'active' : ''}">${c.label}</button>`).join('')}
+                <button data-cat="" class="clear">Clear</button>
+              </div>
+              <select class="team-select" data-id="${a.id}">
+                <option value="">Team (optional)</option>
+                ${teamOptions}
+              </select>
+              <input type="text" class="admin-field meta-title" data-id="${a.id}" placeholder="Custom title (optional)">
+              <textarea class="admin-field meta-desc" data-id="${a.id}" placeholder="Description (optional)" style="min-height: 50px;"></textarea>
+            </div>
+          </div>
+        `).join('');
+
+        for (const sel of grid.querySelectorAll('.team-select')) {
+          sel.value = teamAssignments[sel.dataset.id] || '';
+          sel.addEventListener('change', () => {
+            const id = sel.dataset.id;
+            if (sel.value) teamAssignments[id] = sel.value;
+            else delete teamAssignments[id];
+            localStorage.setItem(TEAM_KEY, JSON.stringify(teamAssignments));
+          });
+        }
+
+        function saveMeta(id) {
+          const card = grid.querySelector(`.admin-card[data-id="${id}"]`);
+          const title = card.querySelector('.meta-title').value.trim();
+          const description = card.querySelector('.meta-desc').value.trim();
+          if (title || description) metaAssignments[id] = { title, description };
+          else delete metaAssignments[id];
+          localStorage.setItem(META_KEY, JSON.stringify(metaAssignments));
+        }
+
+        for (const input of grid.querySelectorAll('.meta-title, .meta-desc')) {
+          const m = metaAssignments[input.dataset.id];
+          if (m) input.value = input.classList.contains('meta-title') ? (m.title || '') : (m.description || '');
+          input.addEventListener('input', () => saveMeta(input.dataset.id));
+        }
+
+        grid.addEventListener('click', (e) => {
+          const btn = e.target.closest('button');
+          if (!btn) return;
+          const card = btn.closest('.admin-card');
+          const id = card.dataset.id;
+          const cat = btn.dataset.cat;
+          if (cat) assignments[id] = cat;
+          else delete assignments[id];
+          localStorage.setItem(CAT_KEY, JSON.stringify(assignments));
+          card.querySelectorAll('.btn-row button').forEach((b) => {
+            b.classList.toggle('active', b.dataset.cat === cat && cat !== '');
+          });
+        });
+      } catch (err) {
+        grid.innerHTML = `<p class="error">${err.message}. Add your Flickr API key to js/config.js.</p>`;
+      }
+
+      document.getElementById('copy').addEventListener('click', async () => {
+        const catLines = Object.entries(assignments).map(([id, cat]) => `  '${id}': '${cat}',`).join('\n');
+        const teamLines = Object.entries(teamAssignments).map(([id, team]) => `  '${id}': '${team}',`).join('\n');
+        const metaLines = Object.entries(metaAssignments).map(([id, m]) => `  '${id}': ${JSON.stringify(m)},`).join('\n');
+        const code = `export const ALBUM_CATEGORIES = {\n${catLines}\n};\n\nexport const ALBUM_TEAM = {\n${teamLines}\n};\n\n// -- paste into js/album-meta.js --\nexport const ALBUM_META = {\n${metaLines}\n};`;
+        const btn = document.getElementById('copy');
+        const output = document.getElementById('output');
+
+        output.value = code;
+        output.style.display = 'block';
+        output.select();
+
+        try {
+          await navigator.clipboard.writeText(code);
+          btn.textContent = 'Copied!';
+        } catch {
+          btn.textContent = 'Select text below and copy';
+        }
+        setTimeout(() => { btn.textContent = 'Copy config'; }, 2000);
+      });
+    }
+  </script>
+</body>
+</html>
