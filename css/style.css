@@ -313,7 +313,9 @@ main {
 .lb-next { right: 1.5rem; }
 
 .album-description {
-  color: var(--grey);
+  color: var(--cream);
+  opacity: 0.85;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
   font-size: 0.95rem;
   max-width: 640px;
   line-height: 1.5;
