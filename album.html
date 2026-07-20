@@ -41,7 +41,11 @@
 
   <div id="lightbox">
     <button id="lb-prev" class="lb-nav lb-prev" aria-label="Previous photo">&#8249;</button>
-    <img alt="">
+    <div class="lightbox-frame">
+      <img alt="">
+      <div class="wm-pattern"></div>
+      <div class="wm-logo"></div>
+    </div>
     <button id="lb-next" class="lb-nav lb-next" aria-label="Next photo">&#8250;</button>
   </div>
 
@@ -69,6 +73,8 @@
       grid.innerHTML = photos.map((p, i) => `
         <a data-index="${i}" class="photo" title="${p.title}" tabindex="0" role="button">
           <img src="${p.thumb}" alt="${p.title}" loading="lazy">
+          <div class="wm-pattern"></div>
+          <div class="wm-logo"></div>
         </a>
       `).join('');
 

@@ -135,6 +135,15 @@ that):
   custom titles/descriptions, reading live from Flickr
 - `js/no-save.js` — blocks the right-click context menu on images (public
   pages only); basic friction, not real protection
+- `.wm-pattern`/`.wm-logo` (in `css/style.css`, used across index/category/
+  album) — display-only watermark: a repeating diagonal "LIBERTY BELL
+  JERSEYS" text (`logos/watermark-pattern.svg`) and a bottom-right corner
+  logo (`logos/lbj_patch_bolt.png`), both CSS overlays. Same caveat as
+  `no-save.js`: this doesn't touch the actual image files in `data/`, so
+  anyone who gets the raw file gets it unwatermarked — it's deterrence, not
+  baked into the pixels. Baking it in for real would mean re-encoding every
+  image in `scripts/fetch-data.mjs` (a new image-processing dependency and
+  a much slower build), which was deliberately avoided.
 - `js/data.js` — what the public pages use to read `data/`, with a 5-minute
   sessionStorage cache
 - `js/flickr.js` — live Flickr API calls, used by `admin.html` and by
