@@ -167,5 +167,5 @@ export const ALBUM_TEAM = {
 };
 
 export const CATEGORY_COVERS = {
-  'custom-work': '72177720313533870',
+  'custom-work': '72177720329236486',
 };
