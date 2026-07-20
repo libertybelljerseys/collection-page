@@ -6,6 +6,13 @@ Jerseys). NHL further splits by NHL team (teams with no albums are hidden
 automatically). Styled to match libertybelljerseys.com's other pages
 (status./scf. subdomains).
 
+Every page has static Open Graph/Twitter Card tags (branded title,
+description, and the LBJ logo as the preview image) so links unfurl
+properly in Discord/Slack/iMessage/etc. They're the same on every page —
+there's no server to generate a per-album or per-category preview, since
+social unfurl bots fetch the raw HTML and don't run JS. Only really
+testable once deployed (bots won't fetch `localhost`).
+
 ## How data flows
 
 The public pages (`index.html`, `category.html`, `album.html`) never talk
