@@ -103,7 +103,10 @@ a { color: inherit; }
 .page-title-block {
   max-width: 1100px;
   margin: 0 auto;
-  padding: 20px 24px 8px;
+  padding: 24px 28px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
 }
 
 .eyebrow {
