@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Liberty Bell Jerseys</title>
   <link rel="stylesheet" href="css/style.css">
+  <script src="js/no-save.js"></script>
 </head>
 <body>
   <header class="site-header">
@@ -54,7 +55,7 @@
       }
 
       grid.innerHTML = photos.map((p, i) => `
-        <a href="${p.full}" data-index="${i}" class="photo" title="${p.title}">
+        <a data-index="${i}" class="photo" title="${p.title}" tabindex="0" role="button">
           <img src="${p.thumb}" alt="${p.title}" loading="lazy">
         </a>
       `).join('');
@@ -70,6 +71,14 @@
       }
 
       grid.addEventListener('click', (e) => {
+        const a = e.target.closest('.photo');
+        if (!a) return;
+        e.preventDefault();
+        showPhoto(Number(a.dataset.index));
+        lightbox.classList.add('open');
+      });
+      grid.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
         const a = e.target.closest('.photo');
         if (!a) return;
         e.preventDefault();

@@ -12,6 +12,11 @@
 
 * { box-sizing: border-box; }
 
+img {
+  -webkit-user-drag: none;
+  user-drag: none;
+}
+
 body {
   margin: 0;
   background: var(--navy);
