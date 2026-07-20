@@ -3,9 +3,28 @@
 Static site that re-hosts the "Liberty Bell Jerseys" Flickr albums,
 organized into browsable categories (Custom Work / NHL / Non-NHL / Wife
 Jerseys). NHL further splits by NHL team (teams with no albums are hidden
-automatically). No backend — pages call the Flickr REST API directly from
-the browser. Styled to match libertybelljerseys.com's other pages
+automatically). Styled to match libertybelljerseys.com's other pages
 (status./scf. subdomains).
+
+## How data flows
+
+The public pages (`index.html`, `category.html`, `album.html`) never call
+the Flickr API themselves — they read a static JSON snapshot in `data/`
+(one `data/albums.json` plus one `data/albums/<id>.json` per album),
+fetched with a short sessionStorage cache on top so repeat navigation
+within a visit is instant. That snapshot is written by
+`scripts/fetch-data.mjs`, which does call the live Flickr API — it runs in
+CI on every deploy and every 6 hours on a schedule (see
+`.github/workflows/deploy.yml`), and you can run it locally too.
+
+`admin.html` is the one exception: it calls the Flickr API live
+(`js/flickr.js`) so sorting/tagging always reflects the current state of
+your Flickr account (e.g. an album you just deleted disappears
+immediately, instead of waiting for the next snapshot refresh).
+
+Net effect: the Flickr API key only ever needs to exist in two places — the
+CI environment (to build the snapshot) and the gated `/admin.html` page
+(for live editing). The fully public pages ship zero Flickr credentials.
 
 ## Setup
 
@@ -14,13 +33,15 @@ the browser. Styled to match libertybelljerseys.com's other pages
    NSID (numeric user id — not the @username).
 2. `cp js/config.example.js js/config.js` and fill in `apiKey` and
    `userId`. `config.js` is gitignored, so neither ever gets committed.
-3. Run a local server (needed because pages use ES modules, which browsers
+3. Generate the local data snapshot: `node scripts/fetch-data.mjs` (writes
+   `data/`, also gitignored — re-run any time to refresh it).
+4. Run a local server (needed because pages use ES modules, which browsers
    block over `file://`):
    ```
    python3 -m http.server 8000
    ```
    then open http://localhost:8000
-4. Go to `/admin.html` (password gate is skipped locally as long as
+5. Go to `/admin.html` (password gate is skipped locally as long as
    `js/admin-auth.js` has an empty hash, which it does by default — see
    Deploy below). Tag each album's category, and — for NHL albums — pick a
    team. Optionally give an album a friendlier display title/description.
@@ -46,29 +67,31 @@ plain branch deploy, so secrets never have to live in the repo:
      plaintext password never touches GitHub at all.
 2. Repo → Settings → Pages → Source → **GitHub Actions** (not "Deploy from
    branch").
-3. Push to `main`. The workflow generates `js/config.js` from
-   `js/config.example.js` with the key/user id injected, and writes
-   `ADMIN_PASSWORD_HASH` straight through to `js/admin-auth.js`, then
-   publishes.
+3. Push to `main`. The workflow generates `js/config.js` and
+   `js/admin-auth.js` from the secrets, runs `scripts/fetch-data.mjs` to
+   build the `data/` snapshot, then publishes everything.
 
-Note on what the secret injection actually buys you: since there's no
-backend, `FLICKR_API_KEY` still ends up in the JS shipped to every visitor's
-browser (view-source / network tab will show it — there's no way around
-that for a pure client-side Flickr integration). What it does get you is
-the key never sitting in the repo or git history, so it's not scraped by
-secret-scanners or exposed to anyone browsing the source on GitHub. Flickr's
-non-commercial key is read-only against public photos, so the blast radius
-of it leaking is low regardless.
+The workflow also runs on a `schedule` (every 6 hours) and can be triggered
+any time from the Actions tab ("Run workflow") — that's how the public
+gallery picks up changes made on Flickr (new/deleted albums, retagged
+photos) without a code push. `/admin.html` always reflects Flickr
+immediately regardless, since it bypasses the snapshot.
 
-`ADMIN_PASSWORD_HASH` is different: it's already just the SHA-256 hash, and
-that hash is what ships in `js/admin-auth.js` — the plaintext password
-never exists in any file, GitHub secret, or CI log. This keeps casual
-visitors out of `/admin.html` (it's also not linked from anywhere on
-the public site, and is marked `noindex`) but it isn't real access control
-— the hash is public in the shipped JS, so a determined, technical visitor
-could brute-force it offline. There's no exposure of anything sensitive
-behind it either way (the Flickr photos are already public), so this is
-meant as a "keep it out of casual view" gate, not a security boundary.
+Note on what the secret injection buys `FLICKR_API_KEY`/`FLICKR_USER_ID`:
+they're only ever used by CI (to build the snapshot) and by `/admin.html`
+(gated, unlinked, `noindex`). The fully public pages ship no Flickr
+credentials at all — a real improvement over shipping the key to every
+visitor, which is what a pure client-side integration would otherwise
+require.
+
+`ADMIN_PASSWORD_HASH` is different again: it's already just the SHA-256
+hash, and that hash is what ships in `js/admin-auth.js` — the plaintext
+password never exists in any file, GitHub secret, or CI log. This keeps
+casual visitors out of `/admin.html` but isn't real access control — the
+hash is public in the shipped JS, so a determined, technical visitor could
+brute-force it offline. There's no exposure of anything sensitive behind it
+either way (the Flickr photos are already public), so this is meant as a
+"keep it out of casual view" gate, not a security boundary.
 
 ### Custom domain (collection.libertybelljerseys.com)
 
@@ -91,22 +114,26 @@ that):
 - `album.html?id=<id>` — photo grid + lightbox (prev/next arrows, arrow-key
   navigation) for one album; shows a custom title/description if set
 - `admin.html` — password-gated; tag albums into categories/teams and set
-  custom titles/descriptions
+  custom titles/descriptions, reading live from Flickr
+- `js/data.js` — what the public pages use to read `data/`, with a 5-minute
+  sessionStorage cache
+- `js/flickr.js` — live Flickr API calls, used by `admin.html` and by
+  `scripts/fetch-data.mjs`; requests the largest available image size
+- `scripts/fetch-data.mjs` — Node script that writes the `data/` snapshot
+- `data/` — generated, gitignored; the static snapshot public pages read
 - `js/config.js` — API key + Flickr user id (gitignored; generated locally
   from `config.example.js`, or by the deploy workflow in CI)
 - `js/config.example.js` — checked-in template for the above
 - `js/admin-auth.js` — SHA-256 hash of the admin password (safe to commit;
   overwritten by CI from the `ADMIN_PASSWORD_HASH` secret)
-- `.github/workflows/deploy.yml` — builds config.js/admin-auth.js from
-  secrets and publishes to GitHub Pages
+- `.github/workflows/deploy.yml` — builds config.js/admin-auth.js/data from
+  secrets, on push and on a 6-hour schedule, and publishes to GitHub Pages
 - `CNAME` — custom domain for GitHub Pages
 - `js/categories.js` — category list + album→category/team mappings (edit
   this after using admin.html)
 - `js/album-meta.js` — optional per-album title/description overrides (edit
   this after using admin.html)
 - `js/teams.js` — the NHL teams (slug, label, color, logo)
-- `js/flickr.js` — Flickr API calls, requesting the largest available image
-  size for the lightbox
 - `logos/teams/` — team crest PNGs (pulled from the lbj-status project's asset set)
 
 Category tiles and team tiles show a preview image (a representative album

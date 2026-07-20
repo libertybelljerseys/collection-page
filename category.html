@@ -26,7 +26,7 @@
   </main>
 
   <script type="module">
-    import { getAlbums } from './js/flickr.js';
+    import { getAlbums } from './js/data.js';
     import { CATEGORIES, ALBUM_CATEGORIES, ALBUM_TEAM } from './js/categories.js';
     import { TEAMS } from './js/teams.js';
     import { ALBUM_META } from './js/album-meta.js';
@@ -99,7 +99,7 @@
         `).join('') || '<p class="error">No albums here yet.</p>';
       }
     } catch (err) {
-      grid.innerHTML = `<p class="error">${err.message}. Add your Flickr API key to js/config.js.</p>`;
+      grid.innerHTML = `<p class="error">${err.message}. Run \`node scripts/fetch-data.mjs\` to generate data/.</p>`;
     }
   </script>
 </body>

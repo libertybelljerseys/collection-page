@@ -3,6 +3,9 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+  schedule:
+    # Refresh the Flickr data snapshot every 6 hours, independent of pushes.
+    - cron: '0 */6 * * *'
   workflow_dispatch:
 
 permissions:
@@ -24,6 +27,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
       - name: Generate config.js
         env:
           FLICKR_API_KEY: ${{ secrets.FLICKR_API_KEY }}
@@ -39,6 +47,9 @@ jobs:
           ADMIN_PASSWORD_HASH: ${{ secrets.ADMIN_PASSWORD_HASH }}
         run: |
           printf "export const ADMIN_PASSWORD_HASH = '%s';\n" "$ADMIN_PASSWORD_HASH" > js/admin-auth.js
+
+      - name: Fetch Flickr data snapshot
+        run: node scripts/fetch-data.mjs
 
       - name: Setup Pages
         uses: actions/configure-pages@v5

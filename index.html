@@ -25,7 +25,7 @@
   </main>
 
   <script type="module">
-    import { getAlbums } from './js/flickr.js';
+    import { getAlbums } from './js/data.js';
     import { CATEGORIES, ALBUM_CATEGORIES } from './js/categories.js';
 
     const el = document.getElementById('categories');
@@ -57,7 +57,7 @@
         </a>
       ` : '');
     } catch (err) {
-      el.innerHTML = `<p class="error">${err.message}. Add your Flickr API key to js/config.js.</p>`;
+      el.innerHTML = `<p class="error">${err.message}. Run \`node scripts/fetch-data.mjs\` to generate data/.</p>`;
     }
   </script>
 </body>

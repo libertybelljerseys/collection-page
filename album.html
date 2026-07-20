@@ -33,7 +33,7 @@
   </div>
 
   <script type="module">
-    import { getAlbumPhotos } from './js/flickr.js';
+    import { getAlbumPhotos } from './js/data.js';
     import { ALBUM_META } from './js/album-meta.js';
 
     const grid = document.getElementById('grid');
@@ -94,7 +94,7 @@
         else if (e.key === 'Escape') lightbox.classList.remove('open');
       });
     } catch (err) {
-      grid.innerHTML = `<p class="error">${err.message}. Add your Flickr API key to js/config.js.</p>`;
+      grid.innerHTML = `<p class="error">${err.message}. Run \`node scripts/fetch-data.mjs\` to generate data/.</p>`;
     }
   </script>
 </body>
