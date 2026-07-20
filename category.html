@@ -14,7 +14,7 @@
       <img class="brand-logo" src="https://images.squarespace-cdn.com/content/v1/5fa5834cd658574ae3274684/cb3a1a1e-fce3-4d90-b3bb-739c8451524d/lbj_patch_bolt.png?format=300w" alt="">
       <span class="brand-name">Liberty Bell Jerseys</span>
     </a>
-    <nav class="breadcrumb" id="breadcrumb"><a href="index.html">Home</a></nav>
+    <nav class="breadcrumb" id="breadcrumb"><a href="/">Home</a></nav>
   </header>
 
   <div class="page-title-block">
@@ -61,7 +61,7 @@
         document.getElementById('title').textContent = categoryLabel;
         document.getElementById('eyebrow').textContent = 'Collection';
         document.title = `${categoryLabel} — Liberty Bell Jerseys`;
-        document.getElementById('breadcrumb').innerHTML = `<a href="index.html">Home</a> / ${categoryLabel}`;
+        document.getElementById('breadcrumb').innerHTML = `<a href="/">Home</a> / ${categoryLabel}`;
 
         const teamTiles = TEAMS.map((t) => ({
           ...t,
@@ -100,8 +100,8 @@
         document.getElementById('eyebrow').textContent = teamLabel ? categoryLabel : 'Collection';
         document.title = `${displayLabel} — Liberty Bell Jerseys`;
         document.getElementById('breadcrumb').innerHTML = teamLabel
-          ? `<a href="index.html">Home</a> / <a href="category.html?cat=${slug}">${categoryLabel}</a> / ${teamLabel}`
-          : `<a href="index.html">Home</a> / ${categoryLabel}`;
+          ? `<a href="/">Home</a> / <a href="category.html?cat=${slug}">${categoryLabel}</a> / ${teamLabel}`
+          : `<a href="/">Home</a> / ${categoryLabel}`;
 
         grid.innerHTML = finalAlbums.map((a) => `
           <a class="tile" href="album.html?id=${a.id}">
