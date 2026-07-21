@@ -1,3 +1,4 @@
 data/images/
+/album-*.html
 node_modules/
 .DS_Store

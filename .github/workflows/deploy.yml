@@ -30,6 +30,9 @@ jobs:
         run: |
           printf "export const ADMIN_PASSWORD_HASH = '%s';\n" "$ADMIN_PASSWORD_HASH" > js/admin-auth.js
 
+      - name: Generate album share pages
+        run: node scripts/gen-album-pages.mjs
+
       - name: Setup Pages
         uses: actions/configure-pages@v6
 

@@ -115,7 +115,7 @@
           : `<a href="/">Home</a> / ${categoryLabel}`;
 
         grid.innerHTML = finalAlbums.map((a) => `
-          <a class="tile" href="album.html?id=${a.id}">
+          <a class="tile" href="album-${a.id}.html">
             <img src="${a.cover}" alt="" loading="lazy">
             <h3>${ALBUM_META[a.id]?.title || a.title}</h3>
             <p>${a.count} photo${a.count === 1 ? '' : 's'}</p>

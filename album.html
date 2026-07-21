@@ -62,7 +62,7 @@
     import { getAlbumPhotos, getMeta } from './js/data.js';
 
     const grid = document.getElementById('grid');
-    const id = new URLSearchParams(location.search).get('id');
+    const id = new URLSearchParams(location.search).get('id') || document.body.dataset.id;
 
     try {
       const [{ title, photos }, albumMeta] = await Promise.all([getAlbumPhotos(id), getMeta()]);
