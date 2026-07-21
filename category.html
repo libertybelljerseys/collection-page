@@ -48,22 +48,24 @@
   </footer>
 
   <script type="module">
-    import { getAlbums } from './js/data.js';
-    import { CATEGORIES, ALBUM_CATEGORIES, ALBUM_TEAM } from './js/categories.js';
+    import { getAlbums, getMeta } from './js/data.js';
+    import { CATEGORIES } from './js/categories.js';
     import { TEAMS } from './js/teams.js';
-    import { ALBUM_META } from './js/album-meta.js';
 
     const grid = document.getElementById('grid');
     const params = new URLSearchParams(location.search);
     const slug = params.get('cat') || '';
     const teamSlug = params.get('team');
 
-    const meta = CATEGORIES.find((c) => c.slug === slug);
-    const categoryLabel = meta ? meta.label : 'Uncategorized';
+    const catInfo = CATEGORIES.find((c) => c.slug === slug);
+    const categoryLabel = catInfo ? catInfo.label : 'Uncategorized';
     const teamSplit = slug === 'nhl';
 
     try {
-      const albums = await getAlbums();
+      const [albums, meta] = await Promise.all([getAlbums(), getMeta()]);
+      const ALBUM_CATEGORIES = meta.albumCategories;
+      const ALBUM_TEAM = meta.albumTeam;
+      const ALBUM_META = meta.albumMeta;
       const inCategory = albums.filter((a) => (ALBUM_CATEGORIES[a.id] || 'uncategorized') === slug);
 
       if (teamSplit && !teamSlug) {

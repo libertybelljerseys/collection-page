@@ -26,7 +26,6 @@ import { mkdir, readdir, readFile, writeFile, unlink } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import sharp from 'sharp';
-import { ALBUM_META } from '../js/album-meta.js';
 
 const BUCKET = process.env.R2_BUCKET;
 // Accept either "img.example.com" or "https://img.example.com" in the env var.
@@ -144,7 +143,7 @@ async function bulkMigrate() {
       continue;
     }
     const albumData = JSON.parse(await readFile(`data/albums/${a.id}.json`, 'utf8'));
-    const displayTitle = ALBUM_META[a.id]?.title || albumData.title || a.title || a.id;
+    const displayTitle = albumData.title || a.title || a.id;
     const slug = slugify(displayTitle);
     const entries = albumData.photos.map((p) => {
       // Prefer the true original (fetched separately, once, straight from

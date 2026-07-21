@@ -48,23 +48,23 @@
   </footer>
 
   <script type="module">
-    import { getAlbums } from './js/data.js';
-    import { CATEGORIES, ALBUM_CATEGORIES, CATEGORY_COVERS } from './js/categories.js';
+    import { getAlbums, getMeta } from './js/data.js';
+    import { CATEGORIES } from './js/categories.js';
 
     const el = document.getElementById('categories');
     try {
-      const albums = await getAlbums();
+      const [albums, meta] = await Promise.all([getAlbums(), getMeta()]);
       const byCategory = Object.fromEntries(CATEGORIES.map((c) => [c.slug, []]));
       const uncategorized = [];
       for (const a of albums) {
-        const cat = ALBUM_CATEGORIES[a.id];
+        const cat = meta.albumCategories[a.id];
         if (cat && byCategory[cat]) byCategory[cat].push(a);
         else uncategorized.push(a);
       }
 
       el.innerHTML = CATEGORIES.map((c) => {
         const list = byCategory[c.slug];
-        const overrideAlbum = albums.find((a) => a.id === CATEGORY_COVERS[c.slug]);
+        const overrideAlbum = albums.find((a) => a.id === meta.categoryCovers[c.slug]);
         const cover = overrideAlbum?.cover || list[0]?.cover;
         return `
           <a class="tile${cover ? '' : ' no-cover'}" href="category.html?cat=${c.slug}">

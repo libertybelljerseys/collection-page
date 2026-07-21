@@ -59,15 +59,14 @@
   </div>
 
   <script type="module">
-    import { getAlbumPhotos } from './js/data.js';
-    import { ALBUM_META } from './js/album-meta.js';
+    import { getAlbumPhotos, getMeta } from './js/data.js';
 
     const grid = document.getElementById('grid');
     const id = new URLSearchParams(location.search).get('id');
 
     try {
-      const { title, photos } = await getAlbumPhotos(id);
-      const meta = ALBUM_META[id];
+      const [{ title, photos }, albumMeta] = await Promise.all([getAlbumPhotos(id), getMeta()]);
+      const meta = albumMeta.albumMeta[id];
       const displayTitle = meta?.title || title;
 
       document.getElementById('title').textContent = displayTitle;

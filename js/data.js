@@ -5,6 +5,7 @@
 // during one visit doesn't even re-fetch the local JSON.
 
 const CACHE_TTL_MS = 5 * 60 * 1000;
+const ADMIN_API = 'https://admin-api.libertybelljerseys.com';
 
 async function cachedFetch(url, cacheKey) {
   const cached = sessionStorage.getItem(cacheKey);
@@ -25,4 +26,20 @@ export async function getAlbums() {
 
 export async function getAlbumPhotos(id) {
   return cachedFetch(`data/albums/${id}.json`, `data:album:${id}`);
+}
+
+// Album category/team/cover/title-description assignments — edited via
+// admin.html, written to R2 by the collection-admin Worker (see worker/).
+export async function getMeta() {
+  return cachedFetch(`${ADMIN_API}/meta`, 'data:meta');
+}
+
+export async function saveMeta(password, data) {
+  const res = await fetch(`${ADMIN_API}/save`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password, data }),
+  });
+  if (!res.ok) throw new Error(res.status === 401 ? 'Wrong password' : `Save failed (${res.status})`);
+  sessionStorage.removeItem('data:meta');
 }

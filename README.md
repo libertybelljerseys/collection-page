@@ -16,20 +16,22 @@ testable once deployed (bots won't fetch `localhost`).
 ## How data flows
 
 The public pages (`index.html`, `category.html`, `album.html`) and
-`admin.html` all read the same committed manifest: `data/albums.json`
-(one entry per album — `id`, `title`, `count`, `cover`) plus one
-`data/albums/<id>.json` per album (`title` and a `photos` array of
-`{id, title, thumb, full}`). `cover`/`thumb`/`full` are all URLs on the R2
-custom domain (`img.libertybelljerseys.com`) — the manifest JSON is the
-only thing in `data/` that's checked into git; no image bytes live in this
-repo. `js/data.js` fetches that JSON (with a 5-minute sessionStorage cache
-for snappy in-visit navigation) and is the single source both public pages
-and `admin.html` read from — there's no separate "live" backend to keep in
-sync.
+`admin.html` all read `data/albums.json` (one entry per album — `id`,
+`title`, `count`, `cover`) plus one `data/albums/<id>.json` per album
+(`title` and a `photos` array of `{id, title, thumb, full}`) — these are
+committed to git and written by `scripts/r2-publish.mjs`, run locally (not
+in CI) whenever you publish a new album. See "Adding a new album" below.
+`cover`/`thumb`/`full` are all URLs on the R2 custom domain
+(`img.libertybelljerseys.com`); no image bytes live in this repo.
 
-The manifest and the R2 bucket are both written by
-`scripts/r2-publish.mjs`, run locally (not in CI) whenever you publish a
-new album. See "Adding a new album" below.
+Category/team tags, per-album title/description overrides, and
+category-cover picks are a *separate*, non-committed blob
+(`meta/config.json` in the same R2 bucket, shaped like
+`{albumCategories, albumTeam, categoryCovers, albumMeta}`), served and
+written by a small Cloudflare Worker (`worker/`) — see "Editing album
+metadata" below. `js/data.js`'s `getAlbums()`/`getMeta()` (5-minute
+sessionStorage cache for snappy in-visit navigation) are the single source
+both public pages and `admin.html` read from.
 
 ## Setup
 
@@ -39,18 +41,33 @@ new album. See "Adding a new album" below.
    python3 -m http.server 8000
    ```
    then open http://localhost:8000
-2. Go to `/admin.html` (password gate is skipped locally as long as
-   `js/admin-auth.js` has an empty hash, which it does by default — see
-   Deploy below). Tag each album's category, and — for NHL albums — pick a
-   team. Optionally give an album a friendlier display title/description,
-   or pick which album represents each category's home-page tile (defaults
-   to the first album in that category — the "Category covers" pickers at
-   the top of the page). Click "Copy config" and paste the result over
-   `ALBUM_CATEGORIES`, `ALBUM_TEAM`, and `CATEGORY_COVERS` in
-   `js/categories.js`, and `ALBUM_META` in `js/album-meta.js`. Untagged
-   albums show up under "Uncategorized" (or "Unassigned" within the NHL
-   team split) so nothing gets lost. Albums
-   titled "K ..." auto-tag to Wife Jerseys.
+2. Go to `/admin.html` to tag albums into categories — see "Editing album
+   metadata" below.
+
+## Editing album metadata
+
+Tag each album's category, and — for NHL albums — pick a team. Optionally
+give an album a friendlier display title/description, or pick which album
+represents each category's home-page tile (defaults to the first album in
+that category — the "Category covers" pickers at the top of the page).
+Click "Save" and it's live within a few minutes (limited only by each
+visitor's 5-minute `sessionStorage` cache) — no commit/push/build step.
+Untagged albums show up under "Uncategorized" (or "Unassigned" within the
+NHL team split) so nothing gets lost. Albums titled "K ..." auto-tag to
+Wife Jerseys.
+
+"Save" POSTs to the `collection-admin` Worker (`worker/`), which writes
+`meta/config.json` to the `lbj-photos` R2 bucket — gated by the same
+password as the `/admin.html` page itself (the password gate is skipped
+locally as long as `js/admin-auth.js` has an empty hash, which it does by
+default — see Deploy below, and note the Save button still needs the real
+password, prompted the first time you click it). The Worker itself is
+deployed locally, like `scripts/r2-publish.mjs`, not from CI:
+```
+cd worker
+npx wrangler deploy                       # after editing worker/src/index.js
+npx wrangler secret put ADMIN_PASSWORD    # once, or to rotate it
+```
 
 ## Adding a new album
 
@@ -119,8 +136,8 @@ that):
 - `album.html?id=<id>` — photo grid + lightbox (prev/next arrows, arrow-key
   navigation) for one album; shows a custom title/description if set
 - `admin.html` — password-gated; tag albums into categories/teams and set
-  custom titles/descriptions, reading the same committed manifest as the
-  public pages
+  custom titles/descriptions; "Save" writes straight to R2 via the
+  `collection-admin` Worker (`worker/`)
 - `js/no-save.js` — blocks the right-click context menu on images (public
   pages only); basic friction, not real protection
 - `.wm-pattern`/`.wm-logo` (in `css/style.css`) — display-only watermark on
@@ -138,23 +155,30 @@ that):
   the pixels. Baking it in for real would mean adding it to the resize step
   in `scripts/r2-publish.mjs`, which was deliberately avoided (extra
   complexity in a script that already touches every photo once).
-- `js/data.js` — reads the committed manifest in `data/`; used by both the
-  public pages and `admin.html`, with a 5-minute sessionStorage cache
+- `js/data.js` — reads the committed manifest in `data/` (`getAlbums`,
+  `getAlbumPhotos`) and the R2-backed metadata blob via the Worker
+  (`getMeta`, `saveMeta`); used by both the public pages and `admin.html`,
+  with a 5-minute sessionStorage cache
 - `data/albums.json`, `data/albums/<id>.json` — the committed manifest;
   `cover`/`thumb`/`full` are R2 URLs
 - `scripts/r2-publish.mjs` — Node script (run locally, not in CI) that
   uploads photos to R2 and writes the manifest above; `--migrate` for the
   one-time Flickr→R2 move, `--new "<Title>" <folder>` for publishing a new
   album (see "Adding a new album")
+- `worker/` — the `collection-admin` Cloudflare Worker: `GET /meta` and
+  `POST /save` (password-gated) against `meta/config.json` in the
+  `lbj-photos` R2 bucket, bound directly (no credentials to manage). Routed
+  at `admin-api.libertybelljerseys.com`. Deployed locally with
+  `npx wrangler deploy` from `worker/`, not from CI — see "Editing album
+  metadata"
 - `js/admin-auth.js` — SHA-256 hash of the admin password (safe to commit;
-  overwritten by CI from the `ADMIN_PASSWORD_HASH` secret)
+  overwritten by CI from the `ADMIN_PASSWORD_HASH` secret); the Worker
+  checks the same plaintext password separately, as its own secret
 - `.github/workflows/deploy.yml` — builds admin-auth.js from a secret on
   every push to `main`, and publishes to GitHub Pages
 - `CNAME` — custom domain for GitHub Pages
-- `js/categories.js` — category list, album→category/team mappings, and
-  per-category home-page cover overrides (edit this after using admin.html)
-- `js/album-meta.js` — optional per-album title/description overrides (edit
-  this after using admin.html)
+- `js/categories.js` — the static category list (slug/label); rarely
+  changes
 - `js/teams.js` — the NHL teams (slug, label, color, logo)
 - `logos/teams/` — team crest PNGs (pulled from the lbj-status project's asset set)
 - `backgrounds/texture.jpg` — same background texture as status.libertybelljerseys.com
