@@ -67,7 +67,7 @@ async function uploadFile(localPath, key, contentType, attempt = 1) {
   const args = ['wrangler', 'r2', 'object', 'put', `${BUCKET}/${key}`, '--file', localPath, '--remote'];
   if (contentType) args.push('--content-type', contentType);
   try {
-    execFileSync('npx', args, { stdio: 'inherit' });
+    execFileSync('npx', args, { stdio: 'pipe' });
   } catch (err) {
     if (attempt >= 4) throw err;
     console.warn(`  retrying ${key} (attempt ${attempt + 1})...`);

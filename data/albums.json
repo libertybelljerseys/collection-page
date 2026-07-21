@@ -318,12 +318,6 @@
     "cover": "https://img.libertybelljerseys.com/albums/burger-king/cover.jpg"
   },
   {
-    "id": "72157711867098726",
-    "title": "Kings 50th 2.0",
-    "count": 5,
-    "cover": "https://img.libertybelljerseys.com/albums/kings-50th-2-0/cover.jpg"
-  },
-  {
     "id": "72177720323477293",
     "title": "2024 FAPro Kopitar",
     "count": 4,
@@ -610,5 +604,17 @@
     "title": "NCSU Raleigh",
     "count": 4,
     "cover": "https://img.libertybelljerseys.com/albums/ncsu-raleigh/cover.jpg"
+  },
+  {
+    "id": "kings-darkcrown-alt",
+    "title": "kings_darkcrown_alt",
+    "count": 4,
+    "cover": "https://img.libertybelljerseys.com/albums/kings-darkcrown-alt/cover.jpg"
+  },
+  {
+    "id": "avs-nords",
+    "title": "avs_nords",
+    "count": 5,
+    "cover": "https://img.libertybelljerseys.com/albums/avs-nords/cover.jpg"
   }
 ]
