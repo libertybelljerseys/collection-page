@@ -135,7 +135,7 @@
 
         grid.innerHTML = albums.map((a) => `
           <div class="admin-card" data-id="${a.id}">
-            <img src="${a.cover}" alt="" loading="lazy">
+            <img src="${a.cover.replace('/cover.jpg', '/thumb/01.jpg')}" alt="" loading="lazy">
             <div class="admin-info">
               <p>${a.title} <span class="muted">(${a.count})</span></p>
               <div class="btn-row">
