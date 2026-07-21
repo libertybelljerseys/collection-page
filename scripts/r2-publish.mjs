@@ -15,6 +15,14 @@
 //     in filename order. Full-resolution photos are uploaded as-is; only
 //     the thumb is generated.
 //
+//   node scripts/r2-publish.mjs --delete <album-id-or-url>
+//     Deletes an album: removes its photos/cover from R2, drops its entry
+//     from data/albums.json, and deletes data/albums/<id>.json. Accepts a
+//     bare id or any URL/string containing it (e.g. an album.html?id=...
+//     link) — pulls out the first run of 5+ digits. Doesn't touch any
+//     category/team tag in meta/config.json; that just becomes an orphaned
+//     entry admin.html no longer shows, which is harmless.
+//
 // Requires wrangler to be authenticated (CLOUDFLARE_API_TOKEN / `wrangler
 // login`) and these env vars:
 //   R2_BUCKET       the bucket name, e.g. lbj-photos
@@ -181,6 +189,50 @@ async function publishNew(title, folder) {
   console.log(`✓ Published "${title}" → albums/${slug}/ (${entries.length} photos)`);
 }
 
+// Deletes are keyed by the exact thumb/full/cover URLs already recorded in
+// the manifest, not a bucket listing — wrangler's R2 CLI has no
+// "list by prefix" command, but we don't need one: every key an album ever
+// wrote is already sitting in data/albums/<id>.json and albums.json.
+async function deleteAlbum(idOrUrl) {
+  const match = idOrUrl.match(/\d{5,}/);
+  if (!match) {
+    console.error(`Couldn't find an album id in "${idOrUrl}"`);
+    process.exit(1);
+  }
+  const id = match[0];
+
+  const albumsPath = 'data/albums.json';
+  const albums = JSON.parse(await readFile(albumsPath, 'utf8'));
+  const idx = albums.findIndex((a) => a.id === id);
+  if (idx < 0) {
+    console.error(`No album with id ${id} in ${albumsPath}`);
+    process.exit(1);
+  }
+  const [entry] = albums.splice(idx, 1);
+
+  const detailPath = `data/albums/${id}.json`;
+  const detail = JSON.parse(await readFile(detailPath, 'utf8'));
+
+  const keys = new Set([entry.cover, ...detail.photos.flatMap((p) => [p.thumb, p.full])].map((url) =>
+    url.replace(`${PUBLIC_BASE}/`, '')
+  ));
+
+  for (const key of keys) {
+    try {
+      execFileSync('npx', ['wrangler', 'r2', 'object', 'delete', `${BUCKET}/${key}`, '--remote'], { stdio: 'pipe' });
+    } catch (err) {
+      console.warn(`  couldn't delete ${key} (maybe already gone) — continuing`);
+      console.warn(`  ${err.stderr?.toString().trim() || err.message}`);
+    }
+  }
+
+  await writeFile(albumsPath, JSON.stringify(albums, null, 2));
+  await unlink(detailPath);
+
+  console.log(`✓ Deleted "${entry.title}" (${id}) — ${keys.size} R2 objects removed.`);
+  console.log(`Commit the updated ${albumsPath} (and the removed ${detailPath}) and push to deploy.`);
+}
+
 const [, , mode, ...rest] = process.argv;
 
 if (mode === '--new') {
@@ -190,9 +242,16 @@ if (mode === '--new') {
     process.exit(1);
   }
   await publishNew(title, folder);
+} else if (mode === '--delete') {
+  const [idOrUrl] = rest;
+  if (!idOrUrl) {
+    console.error('Usage: node scripts/r2-publish.mjs --delete <album-id-or-url>');
+    process.exit(1);
+  }
+  await deleteAlbum(idOrUrl);
 } else if (mode === '--migrate' || !mode) {
   await bulkMigrate();
 } else {
-  console.error('Usage:\n  node scripts/r2-publish.mjs --migrate\n  node scripts/r2-publish.mjs --new "<Title>" <folder-of-photos>');
+  console.error('Usage:\n  node scripts/r2-publish.mjs --migrate\n  node scripts/r2-publish.mjs --new "<Title>" <folder-of-photos>\n  node scripts/r2-publish.mjs --delete <album-id-or-url>');
   process.exit(1);
 }

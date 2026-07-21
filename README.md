@@ -83,6 +83,22 @@ npx wrangler secret put ADMIN_PASSWORD    # once, or to rotate it
 5. Commit the updated `data/albums.json` and `data/albums/<slug>.json`,
    then tag the new album via `/admin.html` as in Setup step 2, and push.
 
+## Deleting an album
+
+1. Same env vars/auth as above (`R2_BUCKET`, `R2_PUBLIC_BASE`, `wrangler`
+   logged in).
+2. `node scripts/r2-publish.mjs --delete <album-id-or-url>` — pass the
+   album's id, or any URL/string containing it (an `album.html?id=...`
+   link works). Deletes its photos/cover/thumbs from R2 (using the URLs
+   already in the manifest, no bucket listing needed), removes its entry
+   from `data/albums.json`, and deletes `data/albums/<id>.json`.
+3. Commit the updated `data/albums.json` (and the removed
+   `data/albums/<id>.json`), then push.
+
+Any category/team tag the album had in `meta/config.json` (R2) is left
+behind as an orphaned entry — harmless, `admin.html` just stops showing it
+once the album is gone from `data/albums.json`.
+
 ## Deploy
 
 Deploys via GitHub Actions (`.github/workflows/deploy.yml`) instead of a
@@ -164,7 +180,9 @@ that):
 - `scripts/r2-publish.mjs` — Node script (run locally, not in CI) that
   uploads photos to R2 and writes the manifest above; `--migrate` for the
   one-time Flickr→R2 move, `--new "<Title>" <folder>` for publishing a new
-  album (see "Adding a new album")
+  album (see "Adding a new album"), `--delete <album-id-or-url>` to remove
+  one (deletes its R2 photos/cover, drops it from `data/albums.json`,
+  deletes `data/albums/<id>.json` — then commit and push)
 - `worker/` — the `collection-admin` Cloudflare Worker: `GET /meta` and
   `POST /save` (password-gated) against `meta/config.json` in the
   `lbj-photos` R2 bucket, bound directly (no credentials to manage). Routed
