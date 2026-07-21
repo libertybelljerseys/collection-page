@@ -105,17 +105,14 @@ async function publishAlbum({ slug, id, title, entries }) {
 
     await uploadFile(entry.fullPath, fullKey, 'image/jpeg');
 
-    if (entry.thumbPath) {
-      await uploadFile(entry.thumbPath, thumbKey, 'image/jpeg');
-    } else {
-      const buf = await sharp(entry.fullPath)
-        .resize({ width: THUMB_WIDTH, withoutEnlargement: true })
-        .jpeg({ quality: 85 })
-        .toBuffer();
-      await uploadBuffer(buf, thumbKey, 'image/jpeg');
-    }
+    const thumbBuf = entry.thumbPath
+      ? await readFile(entry.thumbPath)
+      : await sharp(entry.fullPath).resize({ width: THUMB_WIDTH, withoutEnlargement: true }).jpeg({ quality: 85 }).toBuffer();
+    await uploadBuffer(thumbBuf, thumbKey, 'image/jpeg');
 
-    if (i === 1) await uploadFile(entry.fullPath, `albums/${slug}/cover.jpg`, 'image/jpeg');
+    // Cover is only ever shown as a small grid tile — reuse the thumb-sized
+    // buffer instead of uploading the full-resolution original.
+    if (i === 1) await uploadBuffer(thumbBuf, `albums/${slug}/cover.jpg`, 'image/jpeg');
 
     photos.push({
       id: `${id}-${n}`,
@@ -177,6 +174,24 @@ async function bulkMigrate() {
     console.log(`✓ ${displayTitle} → albums/${slug}/ (${entries.length} photos)`);
   }
   console.log(`Migrated ${migrated} albums (${skipped} already done).`);
+}
+
+// One-off repair for albums published before covers were shrunk to
+// thumbnail size: re-fetches each full-size cover.jpg from R2, resizes it,
+// and uploads it back over the same key.
+async function fixCovers() {
+  const albums = JSON.parse(await readFile('data/albums.json', 'utf8'));
+  let i = 0;
+  for (const a of albums) {
+    i += 1;
+    progress(i, albums.length, `resizing cover for ${a.title || a.id}`);
+    const res = await fetch(a.cover);
+    const buf = Buffer.from(await res.arrayBuffer());
+    const resized = await sharp(buf).resize({ width: THUMB_WIDTH, withoutEnlargement: true }).jpeg({ quality: 85 }).toBuffer();
+    const key = new URL(a.cover).pathname.slice(1);
+    await uploadBuffer(resized, key, 'image/jpeg');
+  }
+  console.log(`Resized ${albums.length} covers.`);
 }
 
 async function publishNew(title, folder) {
@@ -258,9 +273,11 @@ if (mode === '--new') {
     process.exit(1);
   }
   await deleteAlbum(idOrUrl);
+} else if (mode === '--fix-covers') {
+  await fixCovers();
 } else if (mode === '--migrate' || !mode) {
   await bulkMigrate();
 } else {
-  console.error('Usage:\n  node scripts/r2-publish.mjs --migrate\n  node scripts/r2-publish.mjs --new "<Title>" <folder-of-photos>\n  node scripts/r2-publish.mjs --delete <album-id-or-url>');
+  console.error('Usage:\n  node scripts/r2-publish.mjs --migrate\n  node scripts/r2-publish.mjs --new "<Title>" <folder-of-photos>\n  node scripts/r2-publish.mjs --delete <album-id-or-url>\n  node scripts/r2-publish.mjs --fix-covers');
   process.exit(1);
 }
