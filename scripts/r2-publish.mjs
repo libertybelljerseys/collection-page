@@ -60,6 +60,11 @@ function sleep(ms) {
   return new Promise((r) => setTimeout(r, ms));
 }
 
+function progress(i, total, label) {
+  process.stdout.write(`\r  [${i}/${total}] ${label}`.padEnd(60));
+  if (i === total) process.stdout.write('\n');
+}
+
 // Uploads over ~1000 files via individual `wrangler` invocations hit the
 // occasional transient DNS/network blip — retry instead of aborting the
 // whole migration over one flaky request.
@@ -93,6 +98,7 @@ async function publishAlbum({ slug, id, title, entries }) {
   let i = 0;
   for (const entry of entries) {
     i += 1;
+    progress(i, entries.length, `uploading ${entry.fullPath}`);
     const n = String(i).padStart(2, '0');
     const fullKey = `albums/${slug}/full/${n}.jpg`;
     const thumbKey = `albums/${slug}/thumb/${n}.jpg`;
@@ -217,11 +223,14 @@ async function deleteAlbum(idOrUrl) {
     url.replace(`${PUBLIC_BASE}/`, '')
   ));
 
-  for (const key of keys) {
+  const keyList = [...keys];
+  for (let i = 0; i < keyList.length; i += 1) {
+    const key = keyList[i];
+    progress(i + 1, keyList.length, `deleting ${key}`);
     try {
       execFileSync('npx', ['wrangler', 'r2', 'object', 'delete', `${BUCKET}/${key}`, '--remote'], { stdio: 'pipe' });
     } catch (err) {
-      console.warn(`  couldn't delete ${key} (maybe already gone) — continuing`);
+      console.warn(`\n  couldn't delete ${key} (maybe already gone) — continuing`);
       console.warn(`  ${err.stderr?.toString().trim() || err.message}`);
     }
   }

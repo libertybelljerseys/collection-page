@@ -22,7 +22,7 @@ export default {
       const obj = await env.BUCKET.get(META_KEY);
       const body = obj ? await obj.text() : JSON.stringify(EMPTY);
       return new Response(body, {
-        headers: { ...CORS, 'Content-Type': 'application/json', 'Cache-Control': 'no-cache' },
+        headers: { ...CORS, 'Content-Type': 'application/json', 'Cache-Control': 'public, max-age=300' },
       });
     }
 
