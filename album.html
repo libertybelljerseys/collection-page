@@ -75,7 +75,7 @@
       document.title = `${displayTitle} — Liberty Bell Jerseys`;
       if (meta?.description) {
         const desc = document.getElementById('description');
-        desc.textContent = meta.description;
+        desc.textContent = meta.description.replace(/^\* /gm, '• ');
         desc.style.display = 'block';
       }
 
