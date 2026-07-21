@@ -1,0 +1,8 @@
+{
+  "name": "collection-page",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "sharp": "^0.34.0"
+  }
+}

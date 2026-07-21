@@ -1,10 +1,10 @@
 # collection-page
 
-Static site that re-hosts the "Liberty Bell Jerseys" Flickr albums,
+Static site for the "Liberty Bell Jerseys" custom jersey photo albums,
 organized into browsable categories (Custom Work / NHL / Non-NHL / Wife
 Jerseys). NHL further splits by NHL team (teams with no albums are hidden
 automatically). Styled to match libertybelljerseys.com's other pages
-(status./scf. subdomains).
+(status./scf. subdomains). Photos are hosted in Cloudflare R2.
 
 Every page has static Open Graph/Twitter Card tags (branded title,
 description, and the LBJ logo as the preview image) so links unfurl
@@ -15,53 +15,31 @@ testable once deployed (bots won't fetch `localhost`).
 
 ## How data flows
 
-The public pages (`index.html`, `category.html`, `album.html`) never talk
-to Flickr at all, not even for images — they read a fully self-contained
-static snapshot in `data/`: JSON (`data/albums.json` plus one
-`data/albums/<id>.json` per album) and the actual image files
-(`data/images/covers/`, `data/images/photos/`, capped at 2048px — Flickr's
-`_k` size — never the original file). A short sessionStorage cache sits on
-top of the JSON fetches so repeat navigation within a visit is instant.
+The public pages (`index.html`, `category.html`, `album.html`) and
+`admin.html` all read the same committed manifest: `data/albums.json`
+(one entry per album — `id`, `title`, `count`, `cover`) plus one
+`data/albums/<id>.json` per album (`title` and a `photos` array of
+`{id, title, thumb, full}`). `cover`/`thumb`/`full` are all URLs on the R2
+custom domain (`img.libertybelljerseys.com`) — the manifest JSON is the
+only thing in `data/` that's checked into git; no image bytes live in this
+repo. `js/data.js` fetches that JSON (with a 5-minute sessionStorage cache
+for snappy in-visit navigation) and is the single source both public pages
+and `admin.html` read from — there's no separate "live" backend to keep in
+sync.
 
-That snapshot is built by `scripts/fetch-data.mjs`, which does call the
-live Flickr API and download every image — it runs in CI on every deploy
-and once a day on a schedule (see `.github/workflows/deploy.yml`), and you
-can run it locally too. This exists because Flickr rate-limits (429s)
-image requests, especially the original file, more aggressively than a
-live per-visitor integration can tolerate; baking everything into the
-deploy sidesteps that entirely. It also means the site keeps working even
-if Flickr is slow, down, or later closes off hotlinking.
-
-`admin.html` is the one exception: it calls the Flickr API live
-(`js/flickr.js`) so sorting/tagging always reflects the current state of
-your Flickr account (e.g. an album you just deleted disappears
-immediately, instead of waiting for the next snapshot refresh).
-
-Net effect: the Flickr API key only ever needs to exist in two places — the
-CI environment (to build the snapshot) and the gated `/admin.html` page
-(for live editing). The fully public pages ship zero Flickr credentials and
-make zero requests to Flickr.
-
-`data/` is gitignored — none of this ever gets committed. It's regenerated
-by CI into the Pages deployment each run (~430MB for ~103 albums/540
-photos at the time of writing, well under GitHub Pages' 1GB soft limit).
+The manifest and the R2 bucket are both written by
+`scripts/r2-publish.mjs`, run locally (not in CI) whenever you publish a
+new album. See "Adding a new album" below.
 
 ## Setup
 
-1. Get a free Flickr API key: https://www.flickr.com/services/apps/create/apikey/
-   (choose the non-commercial key, it's instant), and find the account's
-   NSID (numeric user id — not the @username).
-2. `cp js/config.example.js js/config.js` and fill in `apiKey` and
-   `userId`. `config.js` is gitignored, so neither ever gets committed.
-3. Generate the local data snapshot: `node scripts/fetch-data.mjs` (writes
-   `data/`, also gitignored — re-run any time to refresh it).
-4. Run a local server (needed because pages use ES modules, which browsers
+1. Run a local server (needed because pages use ES modules, which browsers
    block over `file://`):
    ```
    python3 -m http.server 8000
    ```
    then open http://localhost:8000
-5. Go to `/admin.html` (password gate is skipped locally as long as
+2. Go to `/admin.html` (password gate is skipped locally as long as
    `js/admin-auth.js` has an empty hash, which it does by default — see
    Deploy below). Tag each album's category, and — for NHL albums — pick a
    team. Optionally give an album a friendlier display title/description,
@@ -74,15 +52,26 @@ photos at the time of writing, well under GitHub Pages' 1GB soft limit).
    team split) so nothing gets lost. Albums
    titled "K ..." auto-tag to Wife Jerseys.
 
+## Adding a new album
+
+1. `npm install` once (installs `sharp`, used to generate thumbnails).
+2. Put the album's photos in a local folder, named in the order you want
+   them to appear.
+3. Set `R2_BUCKET` and `R2_PUBLIC_BASE` env vars, and make sure `wrangler`
+   is authenticated (`npx wrangler login`, or set `CLOUDFLARE_API_TOKEN`).
+4. `node scripts/r2-publish.mjs --new "<Album Title>" <folder>` — uploads
+   full-resolution photos plus a generated ~640px thumb to
+   `albums/<slug>/{cover,full,thumb}` in R2, and writes/updates
+   `data/albums.json` + `data/albums/<slug>.json`.
+5. Commit the updated `data/albums.json` and `data/albums/<slug>.json`,
+   then tag the new album via `/admin.html` as in Setup step 2, and push.
+
 ## Deploy
 
 Deploys via GitHub Actions (`.github/workflows/deploy.yml`) instead of a
 plain branch deploy, so secrets never have to live in the repo:
 
 1. Repo → Settings → Secrets and variables → Actions → **Secrets** tab, add:
-   - `FLICKR_API_KEY` — your Flickr key.
-   - `FLICKR_USER_ID` — the Flickr NSID. Not sensitive on its own, but kept
-     as a secret rather than a repo variable so it's never in the repo.
    - `ADMIN_PASSWORD_HASH` — the SHA-256 hash of your `/admin.html`
      password (not the plaintext password itself). Generate it locally:
      `printf '%s' 'your-password' | shasum -a 256` (macOS/BSD) or
@@ -90,33 +79,24 @@ plain branch deploy, so secrets never have to live in the repo:
      plaintext password never touches GitHub at all.
 2. Repo → Settings → Pages → Source → **GitHub Actions** (not "Deploy from
    branch").
-3. Push to `main`. The workflow generates `js/config.js` and
-   `js/admin-auth.js` from the secrets, runs `scripts/fetch-data.mjs` to
-   build the `data/` snapshot, then publishes everything.
+3. Push to `main`. The workflow generates `js/admin-auth.js` from the
+   secret and publishes the repo as-is — no data fetch step, since the
+   manifest is already committed and images already live in R2.
 
-The workflow also runs on a `schedule` (once a day) and can be triggered
-any time from the Actions tab ("Run workflow") — that's how the public
-gallery picks up changes made on Flickr (new/deleted albums, retagged
-photos) without a code push. `/admin.html` always reflects Flickr
-immediately regardless, since it bypasses the snapshot. Daily (not more
-often) because this build now downloads every image, not just JSON — no
-need to run it more than the site actually changes.
+There's no schedule/cron anymore: nothing goes stale on its own (R2 doesn't
+change unless you run `scripts/r2-publish.mjs`), so a normal push is the
+only trigger. Publishing a new album is a local step (`r2-publish.mjs`)
+followed by a commit — see "Adding a new album" above — which triggers a
+deploy the same as any other push.
 
-Note on what the secret injection buys `FLICKR_API_KEY`/`FLICKR_USER_ID`:
-they're only ever used by CI (to build the snapshot) and by `/admin.html`
-(gated, unlinked, `noindex`). The fully public pages ship no Flickr
-credentials at all — a real improvement over shipping the key to every
-visitor, which is what a pure client-side integration would otherwise
-require.
-
-`ADMIN_PASSWORD_HASH` is different again: it's already just the SHA-256
-hash, and that hash is what ships in `js/admin-auth.js` — the plaintext
-password never exists in any file, GitHub secret, or CI log. This keeps
-casual visitors out of `/admin.html` but isn't real access control — the
-hash is public in the shipped JS, so a determined, technical visitor could
-brute-force it offline. There's no exposure of anything sensitive behind it
-either way (the Flickr photos are already public), so this is meant as a
-"keep it out of casual view" gate, not a security boundary.
+`ADMIN_PASSWORD_HASH` is just the SHA-256 hash, and that hash is what ships
+in `js/admin-auth.js` — the plaintext password never exists in any file,
+GitHub secret, or CI log. This keeps casual visitors out of `/admin.html`
+but isn't real access control — the hash is public in the shipped JS, so a
+determined, technical visitor could brute-force it offline. There's no
+exposure of anything sensitive behind it either way (the photos are already
+public on the site), so this is meant as a "keep it out of casual view"
+gate, not a security boundary.
 
 ### Custom domain (collection.libertybelljerseys.com)
 
@@ -139,7 +119,8 @@ that):
 - `album.html?id=<id>` — photo grid + lightbox (prev/next arrows, arrow-key
   navigation) for one album; shows a custom title/description if set
 - `admin.html` — password-gated; tag albums into categories/teams and set
-  custom titles/descriptions, reading live from Flickr
+  custom titles/descriptions, reading the same committed manifest as the
+  public pages
 - `js/no-save.js` — blocks the right-click context menu on images (public
   pages only); basic friction, not real protection
 - `.wm-pattern`/`.wm-logo` (in `css/style.css`) — display-only watermark on
@@ -152,28 +133,23 @@ that):
   regenerate from a source logo:
   `magick source.png -fuzz 20% -transparent black -fuzz 35% -fill white -opaque red watermark-logo.png`).
   Same caveat as
-  `no-save.js`: this doesn't touch the actual image files in `data/`, so
-  anyone who gets the raw file gets it unwatermarked — it's deterrence, not
-  baked into the pixels. Baking it in for real would mean re-encoding every
-  image in `scripts/fetch-data.mjs` (a new image-processing dependency and
-  a much slower build), which was deliberately avoided.
-- `js/data.js` — what the public pages use to read `data/`, with a 5-minute
-  sessionStorage cache
-- `js/flickr.js` — live Flickr API calls, used by `admin.html` and by
-  `scripts/fetch-data.mjs`; caps images at url_k (2048px), never the
-  original file
-- `scripts/fetch-data.mjs` — Node script that writes the `data/` snapshot,
-  including downloading every image (with 429 retry/backoff and a small
-  concurrency limit, since Flickr does rate-limit this)
-- `data/` — generated, gitignored; the static snapshot (JSON + images)
-  public pages read
-- `js/config.js` — API key + Flickr user id (gitignored; generated locally
-  from `config.example.js`, or by the deploy workflow in CI)
-- `js/config.example.js` — checked-in template for the above
+  `no-save.js`: this doesn't touch the actual image files, so anyone who
+  gets the raw file gets it unwatermarked — it's deterrence, not baked into
+  the pixels. Baking it in for real would mean adding it to the resize step
+  in `scripts/r2-publish.mjs`, which was deliberately avoided (extra
+  complexity in a script that already touches every photo once).
+- `js/data.js` — reads the committed manifest in `data/`; used by both the
+  public pages and `admin.html`, with a 5-minute sessionStorage cache
+- `data/albums.json`, `data/albums/<id>.json` — the committed manifest;
+  `cover`/`thumb`/`full` are R2 URLs
+- `scripts/r2-publish.mjs` — Node script (run locally, not in CI) that
+  uploads photos to R2 and writes the manifest above; `--migrate` for the
+  one-time Flickr→R2 move, `--new "<Title>" <folder>` for publishing a new
+  album (see "Adding a new album")
 - `js/admin-auth.js` — SHA-256 hash of the admin password (safe to commit;
   overwritten by CI from the `ADMIN_PASSWORD_HASH` secret)
-- `.github/workflows/deploy.yml` — builds config.js/admin-auth.js/data from
-  secrets, on push and on a daily schedule, and publishes to GitHub Pages
+- `.github/workflows/deploy.yml` — builds admin-auth.js from a secret on
+  every push to `main`, and publishes to GitHub Pages
 - `CNAME` — custom domain for GitHub Pages
 - `js/categories.js` — category list, album→category/team mappings, and
   per-category home-page cover overrides (edit this after using admin.html)

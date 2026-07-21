@@ -3,12 +3,6 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
-  schedule:
-    # Refresh the Flickr data snapshot (including downloaded images) once a
-    # day. Low-traffic, infrequently-updated site — daily is plenty, and
-    # keeps CI time/bandwidth down now that this build downloads every
-    # photo, not just JSON. Use "Run workflow" for an on-demand refresh.
-    - cron: '0 6 * * *'
   workflow_dispatch:
 
 permissions:
@@ -30,29 +24,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v7
 
-      - name: Setup Node
-        uses: actions/setup-node@v7
-        with:
-          node-version: 24
-
-      - name: Generate config.js
-        env:
-          FLICKR_API_KEY: ${{ secrets.FLICKR_API_KEY }}
-          FLICKR_USER_ID: ${{ secrets.FLICKR_USER_ID }}
-        run: |
-          content=$(cat js/config.example.js)
-          content=${content//__FLICKR_API_KEY__/$FLICKR_API_KEY}
-          content=${content//__FLICKR_USER_ID__/$FLICKR_USER_ID}
-          printf '%s\n' "$content" > js/config.js
-
       - name: Generate admin-auth.js
         env:
           ADMIN_PASSWORD_HASH: ${{ secrets.ADMIN_PASSWORD_HASH }}
         run: |
           printf "export const ADMIN_PASSWORD_HASH = '%s';\n" "$ADMIN_PASSWORD_HASH" > js/admin-auth.js
-
-      - name: Fetch Flickr data snapshot
-        run: node scripts/fetch-data.mjs
 
       - name: Setup Pages
         uses: actions/configure-pages@v6
