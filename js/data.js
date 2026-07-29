@@ -34,6 +34,17 @@ export async function getMeta() {
   return cachedFetch(`${ADMIN_API}/meta`, 'data:meta');
 }
 
+// Call right after rendering tiles into a .grid: hides it (see .grid.revealing
+// in style.css) so a slow image doesn't pop into a half-built layout, then
+// fades it in once every image has settled.
+export function revealGrid(el) {
+  el.classList.add('revealing');
+  const imgs = [...el.querySelectorAll('img')];
+  Promise.all(imgs.map((img) => img.complete ? Promise.resolve() :
+    new Promise((resolve) => { img.onload = img.onerror = resolve; })))
+    .then(() => el.classList.add('loaded'));
+}
+
 export async function saveMeta(password, data) {
   const res = await fetch(`${ADMIN_API}/save`, {
     method: 'POST',

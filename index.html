@@ -48,7 +48,7 @@
   </footer>
 
   <script type="module">
-    import { getAlbums, getMeta } from './js/data.js';
+    import { getAlbums, getMeta, revealGrid } from './js/data.js';
     import { CATEGORIES } from './js/categories.js';
 
     const el = document.getElementById('categories');
@@ -68,18 +68,19 @@
         const cover = overrideAlbum?.cover || list[0]?.cover;
         return `
           <a class="tile${cover ? '' : ' no-cover'}" href="category.html?cat=${c.slug}">
-            ${cover ? `<img src="${cover}" alt="" loading="lazy">` : ''}
+            ${cover ? `<img src="${cover}" alt="">` : ''}
             <h2>${c.label}</h2>
             <p>${list.length} album${list.length === 1 ? '' : 's'}</p>
           </a>
         `;
       }).join('') + (uncategorized.length ? `
         <a class="tile${uncategorized[0]?.cover ? '' : ' no-cover'} muted-tile" href="category.html?cat=uncategorized">
-          ${uncategorized[0]?.cover ? `<img src="${uncategorized[0].cover}" alt="" loading="lazy">` : ''}
+          ${uncategorized[0]?.cover ? `<img src="${uncategorized[0].cover}" alt="">` : ''}
           <h2>Uncategorized</h2>
           <p>${uncategorized.length} album${uncategorized.length === 1 ? '' : 's'}</p>
         </a>
       ` : '');
+      revealGrid(el);
     } catch (err) {
       el.innerHTML = `<p class="error">${err.message}. Run \`node scripts/fetch-data.mjs\` to generate data/.</p>`;
     }

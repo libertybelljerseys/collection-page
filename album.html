@@ -59,7 +59,7 @@
   </div>
 
   <script type="module">
-    import { getAlbumPhotos, getMeta } from './js/data.js';
+    import { getAlbumPhotos, getMeta, revealGrid } from './js/data.js';
 
     const grid = document.getElementById('grid');
     const id = new URLSearchParams(location.search).get('id') || document.body.dataset.id;
@@ -80,11 +80,12 @@
 
       grid.innerHTML = photos.map((p, i) => `
         <a data-index="${i}" class="photo" title="${p.title}" tabindex="0" role="button">
-          <img src="${p.thumb}" alt="${p.title}" loading="lazy">
+          <img src="${p.thumb}" alt="${p.title}">
           <div class="wm-pattern"></div>
           <div class="wm-logo"></div>
         </a>
       `).join('');
+      revealGrid(grid);
 
       const lightbox = document.getElementById('lightbox');
       const lightboxImg = lightbox.querySelector('img');

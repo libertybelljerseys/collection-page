@@ -48,7 +48,7 @@
   </footer>
 
   <script type="module">
-    import { getAlbums, getMeta } from './js/data.js';
+    import { getAlbums, getMeta, revealGrid } from './js/data.js';
     import { CATEGORIES } from './js/categories.js';
     import { TEAMS } from './js/teams.js';
 
@@ -82,17 +82,18 @@
 
         grid.innerHTML = teamTiles.map((t) => `
           <a class="tile logo-tile" style="--accent:${t.color}" href="category.html?cat=${slug}&team=${t.slug}">
-            <img src="${t.logo}" alt="" loading="lazy">
+            <img src="${t.logo}" alt="">
             <h2>${t.label}</h2>
             <p>${t.count} album${t.count === 1 ? '' : 's'}</p>
           </a>
         `).join('') + (unassigned.length ? `
           <a class="tile${unassigned[0].cover ? '' : ' no-cover'} muted-tile" href="category.html?cat=${slug}&team=none">
-            ${unassigned[0].cover ? `<img src="${unassigned[0].cover}" alt="" loading="lazy">` : ''}
+            ${unassigned[0].cover ? `<img src="${unassigned[0].cover}" alt="">` : ''}
             <h2>Unassigned</h2>
             <p>${unassigned.length} album${unassigned.length === 1 ? '' : 's'}</p>
           </a>
         ` : '') || '<p class="error">No albums here yet.</p>';
+        revealGrid(grid);
       } else {
         let finalAlbums = inCategory;
         let teamLabel = null;
@@ -116,11 +117,12 @@
 
         grid.innerHTML = finalAlbums.map((a) => `
           <a class="tile" href="album-${a.id}.html">
-            <img src="${a.cover}" alt="" loading="lazy">
+            <img src="${a.cover}" alt="">
             <h3>${ALBUM_META[a.id]?.title || a.title}</h3>
             <p>${a.count} photo${a.count === 1 ? '' : 's'}</p>
           </a>
         `).join('') || '<p class="error">No albums here yet.</p>';
+        revealGrid(grid);
       }
     } catch (err) {
       grid.innerHTML = `<p class="error">${err.message}. Run \`node scripts/fetch-data.mjs\` to generate data/.</p>`;
