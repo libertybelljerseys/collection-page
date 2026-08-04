@@ -8,6 +8,22 @@
   --cream: #E8E4DC;
   --grey: #8a9199;
   --border: rgba(232, 228, 220, 0.09);
+
+  /* Continuous, soft corners read as one material language across cards,
+     tiles and controls — the size steps down with the surface. */
+  --radius-lg: 16px;
+  --radius-md: 10px;
+  --radius-sm: 6px;
+
+  /* Critically-damped-ish settle for chrome/UI motion (no overshoot) and a
+     touch of overshoot reserved for momentum-driven gestures — CSS can't
+     carry live velocity through a re-target the way a spring library can,
+     these curves are the nearest native approximation. */
+  --ease-spring: cubic-bezier(0.32, 0.72, 0, 1);
+  --ease-spring-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --dur-fast: 100ms;
+  --dur-base: 260ms;
+  --dur-slow: 420ms;
 }
 
 * { box-sizing: border-box; }
@@ -15,6 +31,16 @@
 img {
   -webkit-user-drag: none;
   user-drag: none;
+}
+
+a, button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: 2px;
+  border-radius: 2px;
 }
 
 body {
@@ -26,6 +52,7 @@ body {
   background-attachment: fixed;
   color: var(--cream);
   font-family: 'Barlow', sans-serif;
+  font-optical-sizing: auto;
   min-height: 100vh;
 }
 
@@ -47,19 +74,34 @@ body::after {
 a { color: inherit; }
 
 /* Real content sits above the fixed overlay pseudo-element */
-.site-header, .page-title-block, main, .site-footer {
+.page-title-block, main, .site-footer {
   position: relative;
   z-index: 1;
 }
 
 /* ── Top brand bar ─────────────────────────────── */
+/* Sticky, translucent chrome: content scrolls underneath it rather than
+   the bar consuming a fixed strip of layout. Full-bleed so the material
+   reads edge-to-edge, with the same 1100px content measure recreated via
+   padding instead of a nested wrapper. */
 .site-header {
+  position: sticky;
+  top: 0;
+  z-index: 5;
   display: flex;
   align-items: center;
   gap: 12px;
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 24px 24px 0;
+  width: 100%;
+  margin: 0;
+  padding: 16px max(24px, calc((100% - 1100px) / 2));
+  background: rgba(28, 34, 40, 0.72);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid rgba(232, 228, 220, 0.08);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .site-header { background: var(--navy); }
 }
 
 .brand {
@@ -83,18 +125,21 @@ a { color: inherit; }
   font-size: 0.8rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--grey);
+  /* Vibrancy: flat grey reads as muddy over a blurred material — a
+     cream-based tone with real contrast, not the ambient --grey. */
+  color: rgba(232, 228, 220, 0.75);
 }
 
 .breadcrumb {
   margin-left: auto;
   font-size: 0.8rem;
-  color: var(--grey);
+  color: rgba(232, 228, 220, 0.6);
 }
 
 .breadcrumb a {
   color: var(--orange);
   text-decoration: none;
+  transition: color var(--dur-fast) ease-out;
 }
 
 .breadcrumb a:hover { color: var(--orange-dim); }
@@ -104,9 +149,16 @@ a { color: inherit; }
   max-width: 1100px;
   margin: 0 auto;
   padding: 24px 28px;
-  background: var(--card);
+  background: rgba(35, 43, 51, 0.6);
+  backdrop-filter: blur(24px) saturate(160%);
+  -webkit-backdrop-filter: blur(24px) saturate(160%);
   border: 1px solid var(--border);
-  border-radius: 6px;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .page-title-block { background: var(--card); }
 }
 
 .eyebrow {
@@ -123,8 +175,10 @@ a { color: inherit; }
   font-family: 'Barlow Condensed', sans-serif;
   font-weight: 900;
   font-size: clamp(2rem, 6vw, 3.2rem);
+  /* Large display type: tight leading, tracking pulled negative so letters
+     don't drift apart as the size grows. */
   line-height: 0.95;
-  letter-spacing: 0.01em;
+  letter-spacing: -0.02em;
   text-transform: uppercase;
   margin: 0 0 6px;
   color: var(--cream);
@@ -140,6 +194,7 @@ a { color: inherit; }
   height: 3px;
   background: var(--orange);
   margin: 14px 0 4px;
+  border-radius: 2px;
 }
 
 main {
@@ -160,7 +215,7 @@ main {
    image grid itself fades in once its images are ready. */
 .grid.revealing {
   opacity: 0;
-  transition: opacity 0.4s ease;
+  transition: opacity var(--dur-slow) ease;
 }
 
 .grid.revealing.loaded {
@@ -172,11 +227,13 @@ main {
   position: relative;
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 3px;
+  border-radius: var(--radius-md);
   overflow: hidden;
   color: inherit;
   text-decoration: none;
-  transition: transform 0.15s ease, border-color 0.15s ease;
+  transition: transform var(--dur-base) var(--ease-spring-soft),
+              border-color var(--dur-base) ease-out,
+              box-shadow var(--dur-base) var(--ease-spring-soft);
 }
 
 .tile::before {
@@ -186,11 +243,21 @@ main {
   height: 3px;
   background: linear-gradient(90deg, var(--orange), #e8610a, var(--orange-dim));
   opacity: 0;
-  transition: opacity 0.15s ease;
+  transition: opacity var(--dur-fast) ease-out;
 }
 
-.tile:hover { transform: translateY(-2px); border-color: rgba(207, 64, 2, 0.4); }
+.tile:hover {
+  transform: translateY(-3px) scale(1.015);
+  border-color: rgba(207, 64, 2, 0.4);
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.3);
+}
 .tile:hover::before { opacity: 1; }
+
+/* Feedback starts on the press, not the release, and settles fast. */
+.tile:active {
+  transform: scale(0.975);
+  transition: transform var(--dur-fast) ease-out;
+}
 
 .tile img {
   width: 100%;
@@ -203,7 +270,8 @@ main {
 .tile h2, .tile h3 {
   font-family: 'Barlow Condensed', sans-serif;
   font-weight: 700;
-  letter-spacing: 0.02em;
+  letter-spacing: -0.01em;
+  line-height: 1.15;
   text-transform: uppercase;
   margin: 0.85rem 0.25rem 0.1rem 0.9rem;
   font-size: 1.1rem;
@@ -258,20 +326,32 @@ main {
   position: relative;
   display: block;
   overflow: hidden;
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
+  transition: transform var(--dur-base) var(--ease-spring-soft);
+}
+
+.photo:hover { transform: scale(1.02); }
+
+.photo:active {
+  transform: scale(0.975);
+  transition: transform var(--dur-fast) ease-out;
 }
 
 .photo img {
   width: 100%;
   aspect-ratio: 1 / 1;
   object-fit: cover;
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
   display: block;
   border: 1px solid var(--border);
 }
 
+/* Materializes rather than hard-cutting in: opacity and scale animate
+   together so the surface reads as glass arriving, not a plain fade. Kept
+   mounted (visibility, not display) so the transition can actually play
+   on both open and close. */
 #lightbox {
-  display: none;
+  display: flex;
   position: fixed;
   inset: 0;
   z-index: 10;
@@ -280,9 +360,17 @@ main {
   justify-content: center;
   padding: 2rem;
   cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity var(--dur-base) var(--ease-spring-soft),
+              visibility 0s linear var(--dur-base);
 }
 
-#lightbox.open { display: flex; }
+#lightbox.open {
+  opacity: 1;
+  visibility: visible;
+  transition: opacity var(--dur-base) var(--ease-spring-soft);
+}
 
 .lightbox-frame {
   position: relative;
@@ -290,8 +378,13 @@ main {
   line-height: 0;
   max-width: 100%;
   overflow: hidden;
-  border-radius: 4px;
+  border-radius: var(--radius-md);
+  transform: scale(0.92);
+  transition: transform var(--dur-base) var(--ease-spring-soft);
+  touch-action: pan-y;
 }
+
+#lightbox.open .lightbox-frame { transform: scale(1); }
 
 #lightbox img {
   display: block;
@@ -300,15 +393,18 @@ main {
      auto/content-based height, so constrain directly against the
      viewport instead (2rem padding on #lightbox, both sides = 4rem). */
   max-height: calc(100vh - 4rem);
-  border-radius: 4px;
+  border-radius: var(--radius-md);
   cursor: default;
+  transition: opacity 150ms ease;
 }
 
 .lb-nav {
   position: fixed;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(28, 34, 40, 0.7);
+  background: rgba(28, 34, 40, 0.55);
+  backdrop-filter: blur(16px) saturate(180%);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
   border: 1px solid var(--border);
   color: var(--cream);
   width: 48px;
@@ -320,10 +416,17 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: background 0.15s, border-color 0.15s;
+  transition: background var(--dur-fast) ease-out,
+              border-color var(--dur-fast) ease-out,
+              transform var(--dur-fast) ease-out;
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .lb-nav { background: rgba(28, 34, 40, 0.85); }
 }
 
 .lb-nav:hover { background: rgba(207, 64, 2, 0.35); border-color: var(--orange); }
+.lb-nav:active { transform: translateY(-50%) scale(0.92); }
 .lb-prev { left: 1.5rem; }
 .lb-next { right: 1.5rem; }
 
@@ -342,7 +445,7 @@ main {
   color: #e8813a;
   background: rgba(207, 64, 2, 0.08);
   border: 1px solid rgba(207, 64, 2, 0.25);
-  border-radius: 4px;
+  border-radius: var(--radius-sm);
   padding: 14px 18px;
   font-size: 0.9rem;
 }
@@ -351,7 +454,7 @@ main {
 .admin-card {
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: 3px;
+  border-radius: var(--radius-md);
   overflow: hidden;
 }
 
@@ -381,7 +484,7 @@ main {
   background: transparent;
   border: 1px solid var(--border);
   color: var(--cream);
-  border-radius: 2px;
+  border-radius: var(--radius-sm);
   padding: 0.3rem 0.55rem;
   font-family: 'Barlow Condensed', sans-serif;
   font-weight: 600;
@@ -389,17 +492,19 @@ main {
   text-transform: uppercase;
   font-size: 0.72rem;
   cursor: pointer;
+  transition: background var(--dur-fast) ease-out, transform var(--dur-fast) ease-out;
 }
 
 .btn-row button.active { background: var(--orange); border-color: var(--orange); }
 .btn-row button.clear { color: var(--grey); }
+.btn-row button:active { transform: scale(0.94); }
 
 .team-select, .admin-field {
   display: block;
   width: 100%;
   background: rgba(15, 18, 22, 0.75);
   border: 1px solid var(--border);
-  border-radius: 2px;
+  border-radius: var(--radius-sm);
   color: var(--cream);
   font-family: 'Barlow', sans-serif;
   font-size: 0.8rem;
@@ -418,12 +523,13 @@ main {
   width: 100%;
   background: rgba(15, 18, 22, 0.75);
   border: 1px solid var(--border);
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
   color: var(--cream);
   font-family: 'Barlow', sans-serif;
   font-size: 0.95rem;
   padding: 0.7rem 0.85rem;
   margin-bottom: 0.75rem;
+  transition: border-color var(--dur-fast) ease-out;
 }
 
 .auth-gate input:focus {
@@ -449,17 +555,18 @@ main {
   border: none;
   color: #fff;
   padding: 0.6rem 1.1rem;
-  border-radius: 3px;
+  border-radius: var(--radius-sm);
   cursor: pointer;
   font-family: 'Barlow Condensed', sans-serif;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
   font-size: 0.85rem;
-  transition: background 0.15s;
+  transition: background var(--dur-fast) ease-out, transform var(--dur-fast) ease-out;
 }
 
 .btn-primary:hover { background: var(--orange-dim); }
+.btn-primary:active { transform: scale(0.96); }
 
 .section-label {
   font-family: 'Barlow Condensed', sans-serif;
@@ -477,7 +584,7 @@ main {
   background: rgba(15, 18, 22, 0.75);
   color: var(--cream);
   border: 1px solid var(--border);
-  border-radius: 4px;
+  border-radius: var(--radius-md);
   padding: 0.85rem;
   font-family: monospace;
   font-size: 0.85rem;
@@ -496,7 +603,7 @@ main {
 
 .site-footer a {
   text-decoration: none;
-  transition: color 0.15s;
+  transition: color var(--dur-fast) ease-out;
 }
 
 .site-footer a:hover { color: var(--orange); }
@@ -507,4 +614,44 @@ main {
   font-size: 10px;
   line-height: 1.6;
   color: #5a646d;
+}
+
+/* ── Accessibility: reduced motion / transparency / contrast ──────────── */
+@media (prefers-reduced-motion: reduce) {
+  * { scroll-behavior: auto !important; }
+
+  .tile, .photo, .lb-nav, .btn-primary, .btn-row button {
+    transition: opacity 150ms ease, background-color 150ms ease, border-color 150ms ease !important;
+    transform: none !important;
+  }
+  .tile:hover, .tile:active, .photo:hover, .photo:active { transform: none !important; }
+
+  .grid.revealing { transition: opacity 150ms ease; }
+
+  #lightbox {
+    transition: opacity 150ms ease, visibility 0s linear 150ms;
+  }
+  #lightbox.open { transition: opacity 150ms ease; }
+  .lightbox-frame { transform: none !important; transition: none; }
+  #lightbox img { transition: opacity 150ms ease; }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .site-header, .page-title-block, .lb-nav {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .site-header { background: var(--navy); }
+  .page-title-block { background: var(--card); }
+  .lb-nav { background: rgba(28, 34, 40, 0.9); }
+}
+
+@media (prefers-contrast: more) {
+  .site-header, .page-title-block, .tile, .lb-nav, .admin-card {
+    border-color: rgba(232, 228, 220, 0.4);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .site-header { background: var(--navy); }
+  .page-title-block { background: var(--card); }
 }

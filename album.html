@@ -88,19 +88,38 @@
       revealGrid(grid);
 
       const lightbox = document.getElementById('lightbox');
+      const frame = lightbox.querySelector('.lightbox-frame');
       const lightboxImg = lightbox.querySelector('img');
+      const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
       let current = 0;
 
       function showPhoto(i) {
         current = (i + photos.length) % photos.length;
-        lightboxImg.src = photos[current].full;
-        lightboxImg.alt = photos[current].title;
+        const p = photos[current];
+        if (reduceMotion) {
+          lightboxImg.src = p.full;
+          lightboxImg.alt = p.title;
+          return;
+        }
+        lightboxImg.style.opacity = '0';
+        setTimeout(() => {
+          lightboxImg.src = p.full;
+          lightboxImg.alt = p.title;
+          requestAnimationFrame(() => { lightboxImg.style.opacity = '1'; });
+        }, 150);
+      }
+
+      // Grow the lightbox from wherever the photo was tapped, so the
+      // spatial relationship between tile and viewer is obvious.
+      function setOrigin(e) {
+        frame.style.transformOrigin = e ? `${(e.clientX / innerWidth) * 100}% ${(e.clientY / innerHeight) * 100}%` : '';
       }
 
       grid.addEventListener('click', (e) => {
         const a = e.target.closest('.photo');
         if (!a) return;
         e.preventDefault();
+        setOrigin(e);
         showPhoto(Number(a.dataset.index));
         lightbox.classList.add('open');
       });
@@ -109,6 +128,7 @@
         const a = e.target.closest('.photo');
         if (!a) return;
         e.preventDefault();
+        setOrigin(null);
         showPhoto(Number(a.dataset.index));
         lightbox.classList.add('open');
       });
@@ -129,6 +149,83 @@
         else if (e.key === 'ArrowRight') showPhoto(current + 1);
         else if (e.key === 'Escape') lightbox.classList.remove('open');
       });
+
+      // Swipe navigation: 1:1 finger tracking, soft resistance past the
+      // first/last photo, and a momentum projection so a flick — not just
+      // distance — decides whether the swipe commits.
+      if (!reduceMotion) {
+        function rubberband(overshoot, dimension, constant = 0.55) {
+          return (overshoot * dimension * constant) / (dimension + constant * overshoot);
+        }
+        function project(velocity, decel = 0.998) {
+          return (velocity / 1000) * decel / (1 - decel);
+        }
+
+        let dragging = false, didDrag = false, dragStartX = 0, dragX = 0;
+        let lastX = 0, lastT = 0, velocity = 0;
+
+        frame.addEventListener('pointerdown', (e) => {
+          if (photos.length < 2) return;
+          dragging = true;
+          didDrag = false;
+          frame.setPointerCapture(e.pointerId);
+          dragStartX = lastX = e.clientX;
+          lastT = performance.now();
+          velocity = 0;
+          frame.style.transition = 'none';
+        });
+
+        frame.addEventListener('pointermove', (e) => {
+          if (!dragging) return;
+          const now = performance.now();
+          const dt = now - lastT;
+          if (dt > 0) velocity = (e.clientX - lastX) / dt * 1000;
+          lastX = e.clientX;
+          lastT = now;
+
+          let dx = e.clientX - dragStartX;
+          if (Math.abs(dx) > 5) didDrag = true;
+          const w = frame.getBoundingClientRect().width || innerWidth;
+          if ((current === 0 && dx > 0) || (current === photos.length - 1 && dx < 0)) {
+            dx = Math.sign(dx) * rubberband(Math.abs(dx), w);
+          }
+          dragX = dx;
+          frame.style.transform = `translateX(${dx}px)`;
+        });
+
+        function endDrag() {
+          if (!dragging) return;
+          dragging = false;
+          const w = frame.getBoundingClientRect().width || innerWidth;
+          const projected = dragX + project(velocity);
+          const threshold = w * 0.3;
+          frame.style.transition = `transform 260ms var(--ease-spring)`;
+
+          const advance = (dir) => {
+            frame.style.transform = `translateX(${-dir * w}px)`;
+            frame.addEventListener('transitionend', function onEnd() {
+              frame.removeEventListener('transitionend', onEnd);
+              frame.style.transition = 'none';
+              frame.style.transform = `translateX(${dir * w}px)`;
+              showPhoto(current + dir);
+              requestAnimationFrame(() => {
+                frame.style.transition = `transform 260ms var(--ease-spring)`;
+                frame.style.transform = 'translateX(0)';
+              });
+            }, { once: true });
+          };
+
+          if (projected < -threshold && current < photos.length - 1) advance(1);
+          else if (projected > threshold && current > 0) advance(-1);
+          else frame.style.transform = 'translateX(0)';
+        }
+
+        frame.addEventListener('pointerup', endDrag);
+        frame.addEventListener('pointercancel', endDrag);
+        frame.addEventListener('click', (e) => {
+          if (didDrag) { e.stopPropagation(); didDrag = false; }
+        });
+      }
     } catch (err) {
       grid.innerHTML = `<p class="error">${err.message}. Run \`node scripts/fetch-data.mjs\` to generate data/.</p>`;
     }
