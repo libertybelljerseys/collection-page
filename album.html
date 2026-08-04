@@ -92,6 +92,7 @@
       const lightboxImg = lightbox.querySelector('img');
       const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
       let current = 0;
+      let loadToken = 0;
 
       function showPhoto(i) {
         current = (i + photos.length) % photos.length;
@@ -101,12 +102,22 @@
           lightboxImg.alt = p.title;
           return;
         }
+        // Wait for the fade-out AND the actual image load before swapping
+        // src — setting src and fading straight back in shows the *old*
+        // bitmap (Chrome keeps it painted until the new one decodes), so
+        // the swap only becomes visible once the network fetch catches up.
+        const token = ++loadToken;
         lightboxImg.style.opacity = '0';
-        setTimeout(() => {
+        const preload = new Image();
+        const fadeOutDone = new Promise((resolve) => setTimeout(resolve, 150));
+        const imgLoaded = new Promise((resolve) => { preload.onload = preload.onerror = resolve; });
+        preload.src = p.full;
+        Promise.all([fadeOutDone, imgLoaded]).then(() => {
+          if (token !== loadToken) return;
           lightboxImg.src = p.full;
           lightboxImg.alt = p.title;
           requestAnimationFrame(() => { lightboxImg.style.opacity = '1'; });
-        }, 150);
+        });
       }
 
       // Grow the lightbox from wherever the photo was tapped, so the
