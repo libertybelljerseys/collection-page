@@ -107,7 +107,7 @@ async function publishAlbum({ slug, id, title, entries }) {
 
     const thumbBuf = entry.thumbPath
       ? await readFile(entry.thumbPath)
-      : await sharp(entry.fullPath).resize({ width: THUMB_WIDTH, withoutEnlargement: true }).jpeg({ quality: 85 }).toBuffer();
+      : await sharp(entry.fullPath).rotate().resize({ width: THUMB_WIDTH, withoutEnlargement: true }).jpeg({ quality: 85 }).toBuffer();
     await uploadBuffer(thumbBuf, thumbKey, 'image/jpeg');
 
     // Cover is only ever shown as a small grid tile — reuse the thumb-sized
@@ -187,7 +187,7 @@ async function fixCovers() {
     progress(i, albums.length, `resizing cover for ${a.title || a.id}`);
     const res = await fetch(a.cover);
     const buf = Buffer.from(await res.arrayBuffer());
-    const resized = await sharp(buf).resize({ width: THUMB_WIDTH, withoutEnlargement: true }).jpeg({ quality: 85 }).toBuffer();
+    const resized = await sharp(buf).rotate().resize({ width: THUMB_WIDTH, withoutEnlargement: true }).jpeg({ quality: 85 }).toBuffer();
     const key = new URL(a.cover).pathname.slice(1);
     await uploadBuffer(resized, key, 'image/jpeg');
   }
