@@ -174,79 +174,79 @@
     "cover": "https://img.libertybelljerseys.com/albums/vegas-reverse-retro-3-0/cover.jpg"
   },
   {
-    "id": "all-star-4-nations-2019-hurricanes",
+    "id": "asg-2019-hurricanes",
     "title": "Parley MiC White Aho",
     "count": 4,
     "cover": "https://img.libertybelljerseys.com/albums/parley-mic-white-aho/cover.jpg"
   },
   {
-    "id": "all-star-4-nations-2025-4nf-canada",
+    "id": "asg-2025-4nf-canada",
     "title": "4NF Canada Jarvis",
     "count": 5,
     "cover": "https://img.libertybelljerseys.com/albums/4nf-canada-jarvis/cover.jpg"
   },
   {
-    "id": "ducks-2024-present-home",
+    "id": "ana-2024-present-home",
     "title": "Ducks McQueen AP 52",
     "count": 5,
     "cover": "https://img.libertybelljerseys.com/albums/ducks-mcqueen-ap-52/cover.jpg"
   },
   {
-    "id": "coyotes-2022-24-alt",
+    "id": "ari-2022-24-alt",
     "title": "Gostisbehere Desert Nights MiC",
     "count": 4,
     "cover": "https://img.libertybelljerseys.com/albums/gostisbehere-desert-nights-mic/cover.jpg"
   },
   {
-    "id": "flames-2012-hc",
+    "id": "cgy-2012-hc",
     "title": "2011 Heritage Classic Iginla",
     "count": 4,
     "cover": "https://img.libertybelljerseys.com/albums/2011-heritage-classic-iginla/cover.jpg"
   },
   {
-    "id": "flames-2021-2024-away",
+    "id": "cgy-2021-2024-away",
     "title": "Gaudreau Away PG",
     "count": 5,
     "cover": "https://img.libertybelljerseys.com/albums/gaudreau-away-pg/cover.jpg"
   },
   {
-    "id": "hurricanes-2011-17-alt",
+    "id": "car-2011-17-alt",
     "title": "Aho 2011-17 Alt",
     "count": 3,
     "cover": "https://img.libertybelljerseys.com/albums/aho-2011-17-alt/cover.jpg"
   },
   {
-    "id": "hurricanes-2018-21-alt",
+    "id": "car-2018-21-alt",
     "title": "Aho 54 Alt",
     "count": 4,
     "cover": "https://img.libertybelljerseys.com/albums/aho-54-alt/cover.jpg"
   },
   {
-    "id": "hurricanes-2018-21-heritage",
+    "id": "car-2018-21-heritage",
     "title": "Aho Hurriwhalers 54 MiC",
     "count": 4,
     "cover": "https://img.libertybelljerseys.com/albums/aho-hurriwhalers-54-mic/cover.jpg"
   },
   {
-    "id": "hurricanes-2022-anniversary",
+    "id": "car-2022-anniversary",
     "title": "25th Aho 52 MiC",
     "count": 4,
     "cover": "https://img.libertybelljerseys.com/albums/25th-aho-52-mic/cover.jpg"
   },
   {
-    "id": "hurricanes-2024-present-heritage",
+    "id": "car-2024-present-heritage",
     "title": "Blake White Whalers",
     "count": 4,
     "cover": "https://img.libertybelljerseys.com/albums/blake-white-whalers/cover.jpg"
   },
   {
-    "id": "hurricanes-2021-24-away",
+    "id": "car-2021-24-away",
     "title": "GhostBear Away MiC 52",
     "count": 4,
     "cover": "https://img.libertybelljerseys.com/albums/ghostbear-away-mic-52/cover.jpg"
   },
   {
-    "id": "hurricanes-2024-present-home",
+    "id": "car-2024-present-home",
     "title": "Jarvis FAPro 52",
     "count": 4,
     "cover": "https://img.libertybelljerseys.com/albums/jarvis-fapro-52/cover.jpg"
@@ -258,199 +258,199 @@
     "cover": "https://img.libertybelljerseys.com/albums/necas-mic/cover.jpg"
   },
   {
-    "id": "hurricanes-2023-stadium-series",
+    "id": "car-2023-stadium-series",
     "title": "2023SS Necas PGLite MiC",
     "count": 5,
     "cover": "https://img.libertybelljerseys.com/albums/2023ss-necas-pglite-mic/cover.jpg"
   },
   {
-    "id": "hurricanes-2025-present-away",
+    "id": "car-2025-present-away",
     "title": "2025 Away Nikishin",
     "count": 4,
     "cover": "https://img.libertybelljerseys.com/albums/2025-away-nikishin/cover.jpg"
   },
   {
-    "id": "hurricanes-2016-home-gw",
+    "id": "car-2016-home-gw",
     "title": "Pesce 2016-17 Set 2 Home",
     "count": 14,
     "cover": "https://img.libertybelljerseys.com/albums/pesce-2016-17-set-2-home/cover.jpg"
   },
   {
-    "id": "hurricanes-2011-13-home",
+    "id": "car-2011-13-home",
     "title": "Ruutu Edge 2.0",
     "count": 4,
     "cover": "https://img.libertybelljerseys.com/albums/ruutu-edge-2-0/cover.jpg"
   },
   {
-    "id": "hurricanes-2022-reverse-retro-2-0",
+    "id": "car-2022-reverse-retro-2-0",
     "title": "Svech RR2.0 MiC",
     "count": 4,
     "cover": "https://img.libertybelljerseys.com/albums/svech-rr2-0-mic/cover.jpg"
   },
   {
-    "id": "blue-jackets-2025-stadium-series",
+    "id": "cbj-2025-stadium-series",
     "title": "CBJ 25SS Fantilli FAPro",
     "count": 4,
     "cover": "https://img.libertybelljerseys.com/albums/cbj-25ss-fantilli-fapro/cover.jpg"
   },
   {
-    "id": "red-wings-2025-centennial",
+    "id": "det-2025-centennial",
     "title": "Raymond 100th AP 52",
     "count": 5,
     "cover": "https://img.libertybelljerseys.com/albums/raymond-100th-ap-52/cover.jpg"
   },
   {
-    "id": "red-wings-2014-winter-classic",
+    "id": "det-2014-winter-classic",
     "title": "Zetterberg 2014 WC",
     "count": 6,
     "cover": "https://img.libertybelljerseys.com/albums/zetterberg-2014-wc/cover.jpg"
   },
   {
-    "id": "oilers-2022-reverse-retro-2-0",
+    "id": "edm-2022-reverse-retro-2-0",
     "title": "Hyman RR2.0",
     "count": 6,
     "cover": "https://img.libertybelljerseys.com/albums/hyman-rr2-0/cover.jpg"
   },
   {
-    "id": "kings-1995-burger-king",
+    "id": "lak-1995-burger-king",
     "title": "Burger King",
     "count": 5,
     "cover": "https://img.libertybelljerseys.com/albums/burger-king/cover.jpg"
   },
   {
-    "id": "kings-2024-present-home",
+    "id": "lak-2024-present-home",
     "title": "2024 FAPro Kopitar",
     "count": 4,
     "cover": "https://img.libertybelljerseys.com/albums/2024-fapro-kopitar/cover.jpg"
   },
   {
-    "id": "wild-2025-anniversary",
+    "id": "min-2025-anniversary",
     "title": "25th Boldy AP",
     "count": 4,
     "cover": "https://img.libertybelljerseys.com/albums/25th-boldy-ap/cover.jpg"
   },
   {
-    "id": "wild-2022-winter-classic",
+    "id": "min-2022-winter-classic",
     "title": "Wild 22WC MiC",
     "count": 4,
     "cover": "https://img.libertybelljerseys.com/albums/wild-22wc-mic/cover.jpg"
   },
   {
-    "id": "canadiens-1912-barberpole",
+    "id": "mtl-1912-barberpole",
     "title": "Habs Barberpole 6105",
     "count": 4,
     "cover": "https://img.libertybelljerseys.com/albums/habs-barberpole-6105/cover.jpg"
   },
   {
-    "id": "devils-2021-reverse-retro-1-0",
+    "id": "njd-2021-reverse-retro-1-0",
     "title": "NJD RR1.0 Hughes 56 MiC",
     "count": 4,
     "cover": "https://img.libertybelljerseys.com/albums/njd-rr1-0-hughes-56-mic/cover.jpg"
   },
   {
-    "id": "devils-2021-24-alternate",
+    "id": "njd-2021-24-alternate",
     "title": "NNJJJ Hughes/43 52",
     "count": 4,
     "cover": "https://img.libertybelljerseys.com/albums/nnjjj-hughes-43-52/cover.jpg"
   },
   {
-    "id": "rangers-2017-21-away",
+    "id": "nyr-2017-21-away",
     "title": "Rangers Fox Away",
     "count": 6,
     "cover": "https://img.libertybelljerseys.com/albums/rangers-fox-away/cover.jpg"
   },
   {
-    "id": "flyers-2012-winter-classic",
+    "id": "phi-2012-winter-classic",
     "title": "Giroux 2012 WC",
     "count": 3,
     "cover": "https://img.libertybelljerseys.com/albums/giroux-2012-wc/cover.jpg"
   },
   {
-    "id": "flyers-2016-anniversary",
+    "id": "phi-2016-anniversary",
     "title": "Giroux 50th Edge 2.0",
     "count": 3,
     "cover": "https://img.libertybelljerseys.com/albums/giroux-50th-edge-2-0/cover.jpg"
   },
   {
-    "id": "flyers-2019-stadium-series",
+    "id": "phi-2019-stadium-series",
     "title": "Giroux 19SS",
     "count": 4,
     "cover": "https://img.libertybelljerseys.com/albums/giroux-19ss/cover.jpg"
   },
   {
-    "id": "flyers-2021-reverse-retro-1-0",
+    "id": "phi-2021-reverse-retro-1-0",
     "title": "Giroux RR1.0",
     "count": 4,
     "cover": "https://img.libertybelljerseys.com/albums/giroux-rr1-0/cover.jpg"
   },
   {
-    "id": "flyers-2021-24-alternate",
+    "id": "phi-2021-24-alternate",
     "title": "Giroux 1k MiC",
     "count": 5,
     "cover": "https://img.libertybelljerseys.com/albums/giroux-1k-mic/cover.jpg"
   },
   {
-    "id": "flyers-2017-21-away",
+    "id": "phi-2017-21-away",
     "title": "Konecny Indo Away",
     "count": 3,
     "cover": "https://img.libertybelljerseys.com/albums/konecny-indo-away/cover.jpg"
   },
   {
-    "id": "flyers-2025-present-home",
+    "id": "phi-2025-present-home",
     "title": "Michkov FAPro Home",
     "count": 4,
     "cover": "https://img.libertybelljerseys.com/albums/michkov-fapro-home/cover.jpg"
   },
   {
-    "id": "flyers-2024-stadium-series",
+    "id": "phi-2024-stadium-series",
     "title": "Flyers 24SS Tippett MiC 54",
     "count": 4,
     "cover": "https://img.libertybelljerseys.com/albums/flyers-24ss-tippett-mic-54/cover.jpg"
   },
   {
-    "id": "sharks-2024-present-home",
+    "id": "sjs-2024-present-home",
     "title": "Celebrini FAPro Home",
     "count": 4,
     "cover": "https://img.libertybelljerseys.com/albums/celebrini-fapro-home/cover.jpg"
   },
   {
-    "id": "sharks-2024-present-alternate",
+    "id": "sjs-2024-present-alternate",
     "title": "Misa AP Califin",
     "count": 4,
     "cover": "https://img.libertybelljerseys.com/albums/misa-ap-califin/cover.jpg"
   },
   {
-    "id": "sharks-2025-anniversary",
+    "id": "sjs-2025-anniversary",
     "title": "Sharks 35th AP Toffoli",
     "count": 5,
     "cover": "https://img.libertybelljerseys.com/albums/sharks-35th-ap-toffoli/cover.jpg"
   },
   {
-    "id": "kraken-2021-24-home",
+    "id": "sea-2021-24-home",
     "title": "Kraken Home Beniers MiC 52",
     "count": 4,
     "cover": "https://img.libertybelljerseys.com/albums/kraken-home-beniers-mic-52/cover.jpg"
   },
   {
-    "id": "kraken-2024-winter-classic",
+    "id": "sea-2024-winter-classic",
     "title": "Kraken Tolvanen WC",
     "count": 4,
     "cover": "https://img.libertybelljerseys.com/albums/kraken-tolvanen-wc/cover.jpg"
   },
   {
-    "id": "canucks-2014-heritage-classic",
+    "id": "van-2014-heritage-classic",
     "title": "Canucks Millionaires Sedin",
     "count": 4,
     "cover": "https://img.libertybelljerseys.com/albums/canucks-millionaires-sedin/cover.jpg"
   },
   {
-    "id": "canucks-2024-present-alternate",
+    "id": "van-2024-present-alternate",
     "title": "Canucks Hughes FAPro Skate",
     "count": 4,
     "cover": "https://img.libertybelljerseys.com/albums/canucks-hughes-fapro-skate/cover.jpg"
   },
   {
-    "id": "canucks-1982-85-home",
+    "id": "van-1982-85-home",
     "title": "Smyl Flying V",
     "count": 4,
     "cover": "https://img.libertybelljerseys.com/albums/smyl-flying-v/cover.jpg"
@@ -504,73 +504,73 @@
     "cover": "https://img.libertybelljerseys.com/albums/germany-goldmann-game-worn/cover.jpg"
   },
   {
-    "id": "wife-2013-17-home",
+    "id": "wife-car-2013-17-home",
     "title": "K Skinner Home Premier",
     "count": 4,
     "cover": "https://img.libertybelljerseys.com/albums/k-skinner-home-premier/cover.jpg"
   },
   {
-    "id": "wife-2017-present-red",
+    "id": "wife-car-2017-present-red",
     "title": "K Aho Fanatics Home",
     "count": 3,
     "cover": "https://img.libertybelljerseys.com/albums/k-aho-fanatics-home/cover.jpg"
   },
   {
-    "id": "wife-2021-reverse-retro-1-0",
+    "id": "wife-car-2021-reverse-retro-1-0",
     "title": "K Hamilton RR",
     "count": 4,
     "cover": "https://img.libertybelljerseys.com/albums/k-hamilton-rr/cover.jpg"
   },
   {
-    "id": "wife-2022-reverse-retro-2-0",
+    "id": "wife-car-2022-reverse-retro-2-0",
     "title": "K RR2 Jarvis",
     "count": 5,
     "cover": "https://img.libertybelljerseys.com/albums/k-rr2-jarvis/cover.jpg"
   },
   {
-    "id": "wife-2018-present-black",
+    "id": "wife-car-2018-present-black",
     "title": "K Staal Fanatics",
     "count": 3,
     "cover": "https://img.libertybelljerseys.com/albums/k-staal-fanatics/cover.jpg"
   },
   {
-    "id": "wife-2018-present-black-2",
+    "id": "wife-car-2018-present-black-2",
     "title": "K Svech TW Indo",
     "count": 3,
     "cover": "https://img.libertybelljerseys.com/albums/k-svech-tw-indo/cover.jpg"
   },
   {
-    "id": "wife-2011-17-alternate",
+    "id": "wife-car-2011-17-alternate",
     "title": "K Teravainen Premier Alt",
     "count": 4,
     "cover": "https://img.libertybelljerseys.com/albums/k-teravainen-premier-alt/cover.jpg"
   },
   {
-    "id": "wife-2017-19-away",
+    "id": "wife-car-2017-19-away",
     "title": "K Williams Away",
     "count": 3,
     "cover": "https://img.libertybelljerseys.com/albums/k-williams-away/cover.jpg"
   },
   {
-    "id": "wife-2009-11-alternate",
+    "id": "wife-nsh-2009-11-alternate",
     "title": "K Navy Nashville Premier",
     "count": 3,
     "cover": "https://img.libertybelljerseys.com/albums/k-navy-nashville-premier/cover.jpg"
   },
   {
-    "id": "wife-2017-stadium-series",
+    "id": "wife-phi-2017-stadium-series",
     "title": "K 2017 SS",
     "count": 3,
     "cover": "https://img.libertybelljerseys.com/albums/k-2017-ss/cover.jpg"
   },
   {
-    "id": "wife-2019-stadium-series",
+    "id": "wife-phi-2019-stadium-series",
     "title": "K 2019 SS",
     "count": 3,
     "cover": "https://img.libertybelljerseys.com/albums/k-2019-ss/cover.jpg"
   },
   {
-    "id": "wife-2021-reverse-retro-1-0-2",
+    "id": "wife-phi-2021-reverse-retro-1-0",
     "title": "K Giroux RR",
     "count": 4,
     "cover": "https://img.libertybelljerseys.com/albums/k-giroux-rr/cover.jpg"
@@ -588,13 +588,13 @@
     "cover": "https://img.libertybelljerseys.com/albums/ncsu-raleigh/cover.jpg"
   },
   {
-    "id": "kings-2025-present-alt",
+    "id": "lak-2025-present-alt",
     "title": "kings_darkcrown_alt",
     "count": 4,
     "cover": "https://img.libertybelljerseys.com/albums/kings-darkcrown-alt/cover.jpg"
   },
   {
-    "id": "avalanche-2025-present-heritage",
+    "id": "col-2025-present-heritage",
     "title": "avs_nords",
     "count": 5,
     "cover": "https://img.libertybelljerseys.com/albums/avs-nords/cover.jpg"
@@ -606,13 +606,13 @@
     "cover": "https://img.libertybelljerseys.com/albums/aho-icecaps/cover.jpg"
   },
   {
-    "id": "hurricanes-2021-reverse-retro-1-0",
+    "id": "car-2021-reverse-retro-1-0",
     "title": "aho_rr1",
     "count": 4,
     "cover": "https://img.libertybelljerseys.com/albums/aho-rr1/cover.jpg"
   },
   {
-    "id": "mammoth-2025-present-home",
+    "id": "uta-2025-present-home",
     "title": "keller_utah",
     "count": 4,
     "cover": "https://img.libertybelljerseys.com/albums/keller-utah/cover.jpg"

@@ -136,6 +136,7 @@
         grid.innerHTML = albums.map((a) => `
           <div class="admin-card" data-id="${a.id}">
             <img src="${a.cover.replace('/cover.jpg', '/thumb/01.jpg')}" alt="" loading="lazy">
+            <button class="dl-btn" data-slug="${a.cover.match(/\/albums\/([^/]+)\//)[1]}" title="Download full-res .zip" aria-label="Download full-res .zip">&#9662;</button>
             <div class="admin-info">
               <p>${a.title} <span class="muted">(${a.count})</span></p>
               <div class="btn-row">
@@ -145,10 +146,6 @@
               <select class="team-select" data-id="${a.id}">
                 <option value="">Team (optional)</option>
                 ${teamOptions}
-              </select>
-              <select class="download-select" data-slug="${a.cover.match(/\/albums\/([^/]+)\//)[1]}">
-                <option value="">Download…</option>
-                <option value="zip">Full-res .zip</option>
               </select>
               <input type="text" class="admin-field meta-title" data-id="${a.id}" placeholder="Custom title (optional)">
               <textarea class="admin-field meta-desc" data-id="${a.id}" placeholder="Description (optional)" style="min-height: 50px;"></textarea>
@@ -179,15 +176,14 @@
           input.addEventListener('input', () => updateMetaField(input.dataset.id));
         }
 
-        grid.addEventListener('change', (e) => {
-          const sel = e.target.closest('.download-select');
-          if (!sel || !sel.value) return;
-          window.location.href = getZipUrl(sel.dataset.slug);
-          sel.value = '';
+        grid.addEventListener('click', (e) => {
+          const dl = e.target.closest('.dl-btn');
+          if (!dl) return;
+          window.location.href = getZipUrl(dl.dataset.slug);
         });
 
         grid.addEventListener('click', (e) => {
-          const btn = e.target.closest('button');
+          const btn = e.target.closest('.btn-row button');
           if (!btn) return;
           const card = btn.closest('.admin-card');
           const id = card.dataset.id;

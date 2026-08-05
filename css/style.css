@@ -452,6 +452,7 @@ main {
 
 /* ── admin.html ─────────────────────────────────── */
 .admin-card {
+  position: relative;
   background: var(--card);
   border: 1px solid var(--border);
   border-radius: var(--radius-md);
@@ -465,6 +466,29 @@ main {
   display: block;
   background: #10151a;
 }
+
+.dl-btn {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.5rem;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(15, 18, 22, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: var(--cream);
+  font-size: 0.8rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  backdrop-filter: blur(3px);
+  transition: background var(--dur-fast) ease-out, transform var(--dur-fast) ease-out;
+}
+
+.dl-btn:hover { background: rgba(207, 64, 2, 0.75); }
+.dl-btn:active { transform: scale(0.9); }
 
 .admin-info { padding: 0.7rem 0.85rem; }
 
