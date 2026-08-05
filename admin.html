@@ -179,7 +179,7 @@
         grid.addEventListener('click', (e) => {
           const dl = e.target.closest('.dl-btn');
           if (!dl) return;
-          window.location.href = getZipUrl(dl.dataset.slug);
+          window.location.href = getZipUrl(dl.dataset.slug, dl.closest('.admin-card').dataset.id);
         });
 
         grid.addEventListener('click', (e) => {

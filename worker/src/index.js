@@ -66,7 +66,8 @@ export default {
       const zip = downloadZip(files);
       const headers = new Headers(zip.headers);
       for (const [k, v] of Object.entries(CORS)) headers.set(k, v);
-      headers.set('Content-Disposition', `attachment; filename="${slug}.zip"`);
+      const filename = url.searchParams.get('name') || slug;
+      headers.set('Content-Disposition', `attachment; filename="${filename}.zip"`);
       return new Response(zip.body, { headers });
     }
 

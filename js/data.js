@@ -45,10 +45,12 @@ export function revealGrid(el) {
     .then(() => el.classList.add('loaded'));
 }
 
-// Album slug (e.g. "gritty") comes from the cover URL path — admin.html
-// pulls it out with slugFromCover() before calling this.
-export function getZipUrl(slug) {
-  return `${ADMIN_API}/zip/${slug}`;
+// slug (e.g. "gritty") is the R2 folder name, pulled from the cover URL path
+// — that's how the Worker locates the photos. id is the album's own id
+// (e.g. "custom-gritty"), used only to name the downloaded file so it
+// matches data/albums/<id>.json.
+export function getZipUrl(slug, id) {
+  return `${ADMIN_API}/zip/${slug}?name=${encodeURIComponent(id)}`;
 }
 
 export async function saveMeta(password, data) {
