@@ -136,7 +136,7 @@
         grid.innerHTML = albums.map((a) => `
           <div class="admin-card" data-id="${a.id}">
             <img src="${a.cover.replace('/cover.jpg', '/thumb/01.jpg')}" alt="" loading="lazy">
-            <button class="dl-btn" data-slug="${a.cover.match(/\/albums\/([^/]+)\//)[1]}" title="Download full-res .zip" aria-label="Download full-res .zip">&#9662;</button>
+            <button class="dl-btn" title="Download full-res .zip" aria-label="Download full-res .zip">&#9662;</button>
             <div class="admin-info">
               <p>${a.title} <span class="muted">(${a.count})</span></p>
               <div class="btn-row">
@@ -179,7 +179,7 @@
         grid.addEventListener('click', (e) => {
           const dl = e.target.closest('.dl-btn');
           if (!dl) return;
-          window.location.href = getZipUrl(dl.dataset.slug, dl.closest('.admin-card').dataset.id);
+          window.location.href = getZipUrl(dl.closest('.admin-card').dataset.id);
         });
 
         grid.addEventListener('click', (e) => {
