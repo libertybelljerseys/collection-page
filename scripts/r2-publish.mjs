@@ -18,10 +18,10 @@
 //   node scripts/r2-publish.mjs --delete <album-id-or-url>
 //     Deletes an album: removes its photos/cover from R2, drops its entry
 //     from data/albums.json, and deletes data/albums/<id>.json. Accepts a
-//     bare id or any URL/string containing it (e.g. an album.html?id=...
-//     link) — pulls out the first run of 5+ digits. Doesn't touch any
-//     category/team tag in meta/config.json; that just becomes an orphaned
-//     entry admin.html no longer shows, which is harmless.
+//     bare id or any URL/string containing it (e.g. an album-<id>.html link
+//     or an album.html?id=... link). Doesn't touch any category/team tag in
+//     meta/config.json; that just becomes an orphaned entry admin.html no
+//     longer shows, which is harmless.
 //
 // Requires wrangler to be authenticated (CLOUDFLARE_API_TOKEN / `wrangler
 // login`) and these env vars:
@@ -214,13 +214,13 @@ async function publishNew(title, folder) {
 // the manifest, not a bucket listing — wrangler's R2 CLI has no
 // "list by prefix" command, but we don't need one: every key an album ever
 // wrote is already sitting in data/albums/<id>.json and albums.json.
+function extractId(idOrUrl) {
+  const m = idOrUrl.match(/album-(.+)\.html/) || idOrUrl.match(/[?&]id=([^&]+)/);
+  return m ? decodeURIComponent(m[1]) : idOrUrl;
+}
+
 async function deleteAlbum(idOrUrl) {
-  const match = idOrUrl.match(/\d{5,}/);
-  if (!match) {
-    console.error(`Couldn't find an album id in "${idOrUrl}"`);
-    process.exit(1);
-  }
-  const id = match[0];
+  const id = extractId(idOrUrl);
 
   const albumsPath = 'data/albums.json';
   const albums = JSON.parse(await readFile(albumsPath, 'utf8'));

@@ -47,7 +47,7 @@
   </main>
 
   <script type="module">
-    import { getAlbums, getMeta, saveMeta } from './js/data.js';
+    import { getAlbums, getMeta, saveMeta, getZipUrl } from './js/data.js';
     import { CATEGORIES } from './js/categories.js';
     import { TEAMS } from './js/teams.js';
     import { ADMIN_PASSWORD_HASH } from './js/admin-auth.js';
@@ -146,6 +146,10 @@
                 <option value="">Team (optional)</option>
                 ${teamOptions}
               </select>
+              <select class="download-select" data-slug="${a.cover.match(/\/albums\/([^/]+)\//)[1]}">
+                <option value="">Download…</option>
+                <option value="zip">Full-res .zip</option>
+              </select>
               <input type="text" class="admin-field meta-title" data-id="${a.id}" placeholder="Custom title (optional)">
               <textarea class="admin-field meta-desc" data-id="${a.id}" placeholder="Description (optional)" style="min-height: 50px;"></textarea>
             </div>
@@ -174,6 +178,13 @@
           if (m) input.value = input.classList.contains('meta-title') ? (m.title || '') : (m.description || '');
           input.addEventListener('input', () => updateMetaField(input.dataset.id));
         }
+
+        grid.addEventListener('change', (e) => {
+          const sel = e.target.closest('.download-select');
+          if (!sel || !sel.value) return;
+          window.location.href = getZipUrl(sel.dataset.slug);
+          sel.value = '';
+        });
 
         grid.addEventListener('click', (e) => {
           const btn = e.target.closest('button');

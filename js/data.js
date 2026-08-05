@@ -45,6 +45,12 @@ export function revealGrid(el) {
     .then(() => el.classList.add('loaded'));
 }
 
+// Album slug (e.g. "gritty") comes from the cover URL path — admin.html
+// pulls it out with slugFromCover() before calling this.
+export function getZipUrl(slug) {
+  return `${ADMIN_API}/zip/${slug}`;
+}
+
 export async function saveMeta(password, data) {
   const res = await fetch(`${ADMIN_API}/save`, {
     method: 'POST',

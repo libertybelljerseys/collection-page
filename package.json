@@ -5,5 +5,8 @@
   "devDependencies": {
     "sharp": "^0.34.0",
     "wrangler": "^4.112.0"
+  },
+  "dependencies": {
+    "client-zip": "^2.5.0"
   }
 }

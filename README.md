@@ -185,10 +185,12 @@ that):
   deletes `data/albums/<id>.json` — then commit and push)
 - `worker/` — the `collection-admin` Cloudflare Worker: `GET /meta` and
   `POST /save` (password-gated) against `meta/config.json` in the
-  `lbj-photos` R2 bucket, bound directly (no credentials to manage). Routed
-  at `admin-api.libertybelljerseys.com`. Deployed locally with
-  `npx wrangler deploy` from `worker/`, not from CI — see "Editing album
-  metadata"
+  `lbj-photos` R2 bucket, bound directly (no credentials to manage), plus
+  `GET /zip/:slug` which streams a zip of an album's full-res photos (used by
+  admin.html's "Download…" dropdown — same public exposure as the images
+  already have). Routed at `admin-api.libertybelljerseys.com`. Deployed
+  locally with `npx wrangler deploy` from `worker/`, not from CI — see
+  "Editing album metadata"
 - `js/admin-auth.js` — SHA-256 hash of the admin password (safe to commit;
   overwritten by CI from the `ADMIN_PASSWORD_HASH` secret); the Worker
   checks the same plaintext password separately, as its own secret

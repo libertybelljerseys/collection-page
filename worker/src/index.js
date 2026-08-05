@@ -3,6 +3,12 @@
 // already ships in plain JS today), POST /save overwrites them, gated by the
 // same admin password as admin.html itself. Single R2 object
 // (meta/config.json) in the same bucket the photos live in.
+//
+// GET /zip/:slug streams a zip of an album's full-res photos straight from
+// R2 (client-zip builds it on the fly, no buffering) — same public exposure
+// as the images already have at img.libertybelljerseys.com.
+import { downloadZip } from 'client-zip';
+
 const META_KEY = 'meta/config.json';
 const EMPTY = { albumCategories: {}, albumTeam: {}, categoryCovers: {}, albumMeta: {} };
 
@@ -35,6 +41,33 @@ export default {
         httpMetadata: { contentType: 'application/json', cacheControl: 'no-cache' },
       });
       return new Response('OK', { headers: CORS });
+    }
+
+    if (url.pathname.startsWith('/zip/') && request.method === 'GET') {
+      const slug = url.pathname.slice('/zip/'.length);
+      if (!slug) return new Response('Missing album', { status: 400, headers: CORS });
+
+      const prefix = `albums/${slug}/full/`;
+      const objects = [];
+      let cursor;
+      do {
+        const listed = await env.BUCKET.list({ prefix, cursor });
+        objects.push(...listed.objects);
+        cursor = listed.truncated ? listed.cursor : undefined;
+      } while (cursor);
+      if (!objects.length) return new Response('Album not found', { status: 404, headers: CORS });
+      objects.sort((a, b) => a.key.localeCompare(b.key));
+
+      const files = await Promise.all(objects.map(async (o) => {
+        const obj = await env.BUCKET.get(o.key);
+        return { name: o.key.slice(prefix.length), input: obj.body, size: obj.size, lastModified: obj.uploaded };
+      }));
+
+      const zip = downloadZip(files);
+      const headers = new Headers(zip.headers);
+      for (const [k, v] of Object.entries(CORS)) headers.set(k, v);
+      headers.set('Content-Disposition', `attachment; filename="${slug}.zip"`);
+      return new Response(zip.body, { headers });
     }
 
     return new Response('Not found', { status: 404, headers: CORS });
