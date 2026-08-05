@@ -338,10 +338,11 @@ main {
   transition: transform var(--dur-fast) ease-out;
 }
 
-.photo img {
+.photo-img {
   width: 100%;
   aspect-ratio: 1 / 1;
-  object-fit: cover;
+  background-size: cover;
+  background-position: center;
   border-radius: var(--radius-sm);
   display: block;
   border: 1px solid var(--border);
@@ -387,13 +388,20 @@ main {
 
 #lightbox.open .lightbox-frame { transform: scale(1); }
 
-#lightbox img {
+.lightbox-img {
   display: block;
+  /* Unlike an <img>, this div has no intrinsic size to derive a box from,
+     so width/height are set per-photo in JS (from the preloaded image's
+     natural size, scaled to fit #lightbox's padded content box) instead
+     of relying on aspect-ratio here — aspect-ratio can't resolve without
+     a definite width, and .lightbox-frame only shrink-wraps to content,
+     which is a circular dependency for a non-replaced element. These
+     just cap it as a fallback. */
   max-width: 100%;
-  /* A percentage max-height can't resolve against .lightbox-frame's
-     auto/content-based height, so constrain directly against the
-     viewport instead (2rem padding on #lightbox, both sides = 4rem). */
   max-height: calc(100vh - 4rem);
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
   border-radius: var(--radius-md);
   cursor: default;
   transition: opacity 150ms ease;

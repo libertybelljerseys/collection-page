@@ -51,7 +51,7 @@
   <div id="lightbox">
     <button id="lb-prev" class="lb-nav lb-prev" aria-label="Previous photo">&#8249;</button>
     <div class="lightbox-frame">
-      <img alt="">
+      <div class="lightbox-img" role="img"></div>
       <div class="wm-pattern"></div>
       <div class="wm-logo"></div>
     </div>
@@ -80,7 +80,7 @@
 
       grid.innerHTML = photos.map((p, i) => `
         <a data-index="${i}" class="photo" title="${p.title}" tabindex="0" role="button">
-          <img src="${p.thumb}" alt="${p.title}">
+          <div class="photo-img" data-bg="${p.thumb}" style="background-image:url('${p.thumb}')"></div>
           <div class="wm-pattern"></div>
           <div class="wm-logo"></div>
         </a>
@@ -89,17 +89,41 @@
 
       const lightbox = document.getElementById('lightbox');
       const frame = lightbox.querySelector('.lightbox-frame');
-      const lightboxImg = lightbox.querySelector('img');
+      const lightboxImg = lightbox.querySelector('.lightbox-img');
       const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
       let current = 0;
       let loadToken = 0;
 
+      // Applies a loaded photo to the lightbox div: background-image (no
+      // <img> here, so browsers don't offer "save/open image" on it),
+      // an explicit pixel size so it letterboxes like an <img> would, and
+      // an aria-label standing in for alt text.
+      let lightboxNatural = null;
+      function sizeLightboxImg() {
+        if (!lightboxNatural) return;
+        const cs = getComputedStyle(lightbox);
+        const maxW = lightbox.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+        const maxH = lightbox.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+        const scale = Math.min(1, maxW / lightboxNatural.w, maxH / lightboxNatural.h);
+        lightboxImg.style.width = `${lightboxNatural.w * scale}px`;
+        lightboxImg.style.height = `${lightboxNatural.h * scale}px`;
+      }
+      addEventListener('resize', sizeLightboxImg);
+
+      function applyPhoto(preload, p) {
+        lightboxImg.style.backgroundImage = `url('${p.full}')`;
+        lightboxImg.setAttribute('aria-label', p.title);
+        lightboxNatural = { w: preload.naturalWidth, h: preload.naturalHeight };
+        sizeLightboxImg();
+      }
+
       function showPhoto(i) {
         current = (i + photos.length) % photos.length;
         const p = photos[current];
+        const preload = new Image();
         if (reduceMotion) {
-          lightboxImg.src = p.full;
-          lightboxImg.alt = p.title;
+          preload.onload = () => applyPhoto(preload, p);
+          preload.src = p.full;
           return;
         }
         // Wait for the fade-out AND the actual image load before swapping
@@ -108,14 +132,12 @@
         // the swap only becomes visible once the network fetch catches up.
         const token = ++loadToken;
         lightboxImg.style.opacity = '0';
-        const preload = new Image();
         const fadeOutDone = new Promise((resolve) => setTimeout(resolve, 150));
         const imgLoaded = new Promise((resolve) => { preload.onload = preload.onerror = resolve; });
         preload.src = p.full;
         Promise.all([fadeOutDone, imgLoaded]).then(() => {
           if (token !== loadToken) return;
-          lightboxImg.src = p.full;
-          lightboxImg.alt = p.title;
+          applyPhoto(preload, p);
           requestAnimationFrame(() => { lightboxImg.style.opacity = '1'; });
         });
       }

@@ -39,10 +39,14 @@ export async function getMeta() {
 // fades it in once every image has settled.
 export function revealGrid(el) {
   el.classList.add('revealing');
-  const imgs = [...el.querySelectorAll('img')];
-  Promise.all(imgs.map((img) => img.complete ? Promise.resolve() :
-    new Promise((resolve) => { img.onload = img.onerror = resolve; })))
-    .then(() => el.classList.add('loaded'));
+  const imgLoaders = [...el.querySelectorAll('img')].map((img) => img.complete ? Promise.resolve() :
+    new Promise((resolve) => { img.onload = img.onerror = resolve; }));
+  // Background-image tiles (used where we avoid <img> to keep browsers'
+  // native "save/open image" menu off photos) have no load event of their
+  // own — proxy through a throwaway Image() pointed at the same URL.
+  const bgLoaders = [...el.querySelectorAll('[data-bg]')].map((div) =>
+    new Promise((resolve) => { const i = new Image(); i.onload = i.onerror = resolve; i.src = div.dataset.bg; }));
+  Promise.all([...imgLoaders, ...bgLoaders]).then(() => el.classList.add('loaded'));
 }
 
 export function getZipUrl(id) {
