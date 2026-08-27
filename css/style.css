@@ -1,13 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap');
 
+/* colors sourced from ~/git/lbj.css — edit there first, then copy down */
 :root {
   --orange: #CF4002;
-  --orange-dim: #a33200;
+  --orange-dim: #A33201;
   --navy: #1C2228;
   --card: rgba(35, 43, 51, 0.88);
   --cream: #E8E4DC;
-  --grey: #8a9199;
-  --border: rgba(232, 228, 220, 0.09);
+  --grey: #7A8491;
+  --border: rgba(255, 255, 255, 0.09);
 
   /* Continuous, soft corners read as one material language across cards,
      tiles and controls — the size steps down with the surface. */
