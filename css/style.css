@@ -204,6 +204,31 @@ a { color: inherit; }
   border-radius: 2px;
 }
 
+/* ── Home header: centered logo + title, no top bar (matches waitlist page) ── */
+.page-title-block.home-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  background: none;
+  border: none;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  padding: 48px 28px 24px;
+}
+
+.home-logo {
+  height: 64px;
+  width: auto;
+  margin-bottom: 24px;
+  filter: drop-shadow(0 2px 12px rgba(207, 64, 2, 0.35));
+}
+
+.home-header .title-divider {
+  margin: 14px auto 4px;
+}
+
 main {
   max-width: 1100px;
   margin: 0 auto;
