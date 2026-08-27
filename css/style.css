@@ -3,18 +3,21 @@
 /* colors sourced from ~/git/lbj.css — edit there first, then copy down */
 :root {
   --orange: #CF4002;
+  --orange-light: #FF7A3D; /* AA-contrast tint of --orange for small text/links on dark bg (--orange alone is 3.35:1, under 4.5:1) */
   --orange-dim: #A33201;
   --navy: #1C2228;
   --card: rgba(35, 43, 51, 0.88);
   --cream: #E8E4DC;
   --grey: #7A8491;
+  --grey-light: #C7CED4; /* muted-toned body copy on dark bg (~10:1) — use over --grey once text runs longer than a caption */
   --border: rgba(255, 255, 255, 0.09);
 
-  /* Continuous, soft corners read as one material language across cards,
-     tiles and controls — the size steps down with the surface. */
-  --radius-lg: 16px;
-  --radius-md: 10px;
-  --radius-sm: 6px;
+  /* Canonical LBJ corner geometry (see lbj-html/DESIGN_SYSTEM.md): 4px
+     default everywhere. --radius-tight (2px) is reserved for document-like
+     sub-cards — unused here today, kept for parity with the shared system.
+     Large 10–16px radii read as generic SaaS, not this brand. */
+  --radius: 4px;
+  --radius-tight: 2px;
 
   /* Critically-damped-ish settle for chrome/UI motion (no overshoot) and a
      touch of overshoot reserved for momentum-driven gestures — CSS can't
@@ -139,7 +142,7 @@ a { color: inherit; }
 }
 
 .breadcrumb a {
-  color: var(--orange);
+  color: var(--orange-light);
   text-decoration: none;
   transition: color var(--dur-fast) ease-out;
 }
@@ -155,7 +158,7 @@ a { color: inherit; }
   backdrop-filter: blur(24px) saturate(160%);
   -webkit-backdrop-filter: blur(24px) saturate(160%);
   border: 1px solid var(--border);
-  border-radius: var(--radius-lg);
+  border-radius: var(--radius);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
 }
 
@@ -169,7 +172,7 @@ a { color: inherit; }
   font-size: 0.75rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--orange);
+  color: var(--orange-light);
   margin: 0 0 6px;
 }
 
@@ -229,7 +232,7 @@ main {
   position: relative;
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius);
   overflow: hidden;
   color: inherit;
   text-decoration: none;
@@ -328,7 +331,7 @@ main {
   position: relative;
   display: block;
   overflow: hidden;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius);
   transition: transform var(--dur-base) var(--ease-spring-soft);
 }
 
@@ -344,7 +347,7 @@ main {
   aspect-ratio: 1 / 1;
   background-size: cover;
   background-position: center;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius);
   display: block;
   border: 1px solid var(--border);
 }
@@ -381,7 +384,7 @@ main {
   line-height: 0;
   max-width: 100%;
   overflow: hidden;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius);
   transform: scale(0.92);
   transition: transform var(--dur-base) var(--ease-spring-soft);
   touch-action: pan-y;
@@ -403,7 +406,7 @@ main {
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  border-radius: var(--radius-md);
+  border-radius: var(--radius);
   cursor: default;
   transition: opacity 150ms ease;
 }
@@ -455,7 +458,7 @@ main {
   color: #e8813a;
   background: rgba(207, 64, 2, 0.08);
   border: 1px solid rgba(207, 64, 2, 0.25);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius);
   padding: 14px 18px;
   font-size: 0.9rem;
 }
@@ -465,7 +468,7 @@ main {
   position: relative;
   background: var(--card);
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius);
   overflow: hidden;
 }
 
@@ -518,7 +521,7 @@ main {
   background: transparent;
   border: 1px solid var(--border);
   color: var(--cream);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius);
   padding: 0.3rem 0.55rem;
   font-family: 'Barlow Condensed', sans-serif;
   font-weight: 600;
@@ -538,7 +541,7 @@ main {
   width: 100%;
   background: rgba(15, 18, 22, 0.75);
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius);
   color: var(--cream);
   font-family: 'Barlow', sans-serif;
   font-size: 0.8rem;
@@ -557,7 +560,7 @@ main {
   width: 100%;
   background: rgba(15, 18, 22, 0.75);
   border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius);
   color: var(--cream);
   font-family: 'Barlow', sans-serif;
   font-size: 0.95rem;
@@ -589,7 +592,7 @@ main {
   border: none;
   color: #fff;
   padding: 0.6rem 1.1rem;
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius);
   cursor: pointer;
   font-family: 'Barlow Condensed', sans-serif;
   font-weight: 700;
@@ -618,7 +621,7 @@ main {
   background: rgba(15, 18, 22, 0.75);
   color: var(--cream);
   border: 1px solid var(--border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius);
   padding: 0.85rem;
   font-family: monospace;
   font-size: 0.85rem;
@@ -633,6 +636,10 @@ main {
   font-size: 12px;
   letter-spacing: 0.05em;
   color: var(--grey);
+  /* Sits directly on the texture with no card behind it — needs its own
+     shadow since the overlay is a flat average and mottled bright patches
+     can still wash out correctly-toned text locally. */
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.65);
 }
 
 .site-footer a {
@@ -640,14 +647,14 @@ main {
   transition: color var(--dur-fast) ease-out;
 }
 
-.site-footer a:hover { color: var(--orange); }
+.site-footer a:hover { color: var(--orange-light); }
 
 .footer-disclaimer {
   margin: 16px auto 0;
   max-width: 480px;
   font-size: 10px;
   line-height: 1.6;
-  color: #5a646d;
+  color: var(--grey-light);
 }
 
 /* ── Accessibility: reduced motion / transparency / contrast ──────────── */
