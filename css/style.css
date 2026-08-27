@@ -1,23 +1,25 @@
 @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap');
 
-/* colors sourced from ~/git/lbj.css — edit there first, then copy down */
+/* Design tokens: canonical source is ~/git/lbj-html/tokens.css and
+   DESIGN_SYSTEM.md — edit there first, then copy down. Names match that
+   file 1:1 (--lbj-* prefix) for easy diffing/copy-paste across properties. */
 :root {
-  --orange: #CF4002;
-  --orange-light: #FF7A3D; /* AA-contrast tint of --orange for small text/links on dark bg (--orange alone is 3.35:1, under 4.5:1) */
-  --orange-dim: #A33201;
-  --navy: #1C2228;
-  --card: rgba(35, 43, 51, 0.88);
-  --cream: #E8E4DC;
-  --grey: #7A8491;
-  --grey-light: #C7CED4; /* muted-toned body copy on dark bg (~10:1) — use over --grey once text runs longer than a caption */
-  --border: rgba(255, 255, 255, 0.09);
+  --lbj-orange: #CF4002;
+  --lbj-orange-light: #FF7A3D; /* AA-contrast tint of --lbj-orange for small text/links on dark bg (--lbj-orange alone is 3.35:1, under 4.5:1) */
+  --lbj-orange-dim: #A33201;
+  --lbj-bg: #1C2228;
+  --lbj-bg-card: rgba(35, 43, 51, 0.88);
+  --lbj-text: #E8E4DC;
+  --lbj-text-muted: #7A8491;
+  --lbj-text-muted-light: #C7CED4; /* muted-toned body copy on dark bg (~10:1) — use over --lbj-text-muted once text runs longer than a caption */
+  --lbj-border: rgba(255, 255, 255, 0.09);
 
   /* Canonical LBJ corner geometry (see lbj-html/DESIGN_SYSTEM.md): 4px
-     default everywhere. --radius-tight (2px) is reserved for document-like
+     default everywhere. --lbj-radius-tight (2px) is reserved for document-like
      sub-cards — unused here today, kept for parity with the shared system.
      Large 10–16px radii read as generic SaaS, not this brand. */
-  --radius: 4px;
-  --radius-tight: 2px;
+  --lbj-radius: 4px;
+  --lbj-radius-tight: 2px;
 
   /* Critically-damped-ish settle for chrome/UI motion (no overshoot) and a
      touch of overshoot reserved for momentum-driven gestures — CSS can't
@@ -43,19 +45,19 @@ a, button {
 }
 
 :focus-visible {
-  outline: 2px solid var(--orange);
+  outline: 2px solid var(--lbj-orange);
   outline-offset: 2px;
   border-radius: 2px;
 }
 
 body {
   margin: 0;
-  background: var(--navy);
+  background: var(--lbj-bg);
   background-image: url('../backgrounds/texture.jpg');
   background-size: cover;
   background-position: center top;
   background-attachment: fixed;
-  color: var(--cream);
+  color: var(--lbj-text);
   font-family: 'Barlow', sans-serif;
   font-optical-sizing: auto;
   min-height: 100vh;
@@ -106,7 +108,7 @@ a { color: inherit; }
 }
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .site-header { background: var(--navy); }
+  .site-header { background: var(--lbj-bg); }
 }
 
 .brand {
@@ -131,7 +133,7 @@ a { color: inherit; }
   letter-spacing: 0.14em;
   text-transform: uppercase;
   /* Vibrancy: flat grey reads as muddy over a blurred material — a
-     cream-based tone with real contrast, not the ambient --grey. */
+     cream-based tone with real contrast, not the ambient --lbj-text-muted. */
   color: rgba(232, 228, 220, 0.75);
 }
 
@@ -142,12 +144,12 @@ a { color: inherit; }
 }
 
 .breadcrumb a {
-  color: var(--orange-light);
+  color: var(--lbj-orange-light);
   text-decoration: none;
   transition: color var(--dur-fast) ease-out;
 }
 
-.breadcrumb a:hover { color: var(--orange-dim); }
+.breadcrumb a:hover { color: var(--lbj-orange-dim); }
 
 /* ── Page title block ──────────────────────────── */
 .page-title-block {
@@ -157,13 +159,13 @@ a { color: inherit; }
   background: rgba(35, 43, 51, 0.6);
   backdrop-filter: blur(24px) saturate(160%);
   -webkit-backdrop-filter: blur(24px) saturate(160%);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  border: 1px solid var(--lbj-border);
+  border-radius: var(--lbj-radius);
   box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25);
 }
 
 @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .page-title-block { background: var(--card); }
+  .page-title-block { background: var(--lbj-bg-card); }
 }
 
 .eyebrow {
@@ -172,7 +174,7 @@ a { color: inherit; }
   font-size: 0.75rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--orange-light);
+  color: var(--lbj-orange-light);
   margin: 0 0 6px;
 }
 
@@ -186,18 +188,18 @@ a { color: inherit; }
   letter-spacing: -0.02em;
   text-transform: uppercase;
   margin: 0 0 6px;
-  color: var(--cream);
+  color: var(--lbj-text);
 }
 
 .page-title em {
   font-style: normal;
-  color: var(--orange);
+  color: var(--lbj-orange);
 }
 
 .title-divider {
   width: 40px;
   height: 3px;
-  background: var(--orange);
+  background: var(--lbj-orange);
   margin: 14px 0 4px;
   border-radius: 2px;
 }
@@ -230,9 +232,9 @@ main {
 .tile {
   display: block;
   position: relative;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  background: var(--lbj-bg-card);
+  border: 1px solid var(--lbj-border);
+  border-radius: var(--lbj-radius);
   overflow: hidden;
   color: inherit;
   text-decoration: none;
@@ -246,7 +248,7 @@ main {
   position: absolute;
   top: 0; left: 0; right: 0;
   height: 3px;
-  background: linear-gradient(90deg, var(--orange), #e8610a, var(--orange-dim));
+  background: linear-gradient(90deg, var(--lbj-orange), #e8610a, var(--lbj-orange-dim));
   opacity: 0;
   transition: opacity var(--dur-fast) ease-out;
 }
@@ -284,14 +286,14 @@ main {
 
 .tile p {
   margin: 0 0 0.85rem 0.9rem;
-  color: var(--grey);
+  color: var(--lbj-text-muted);
   font-size: 0.8rem;
 }
 
 .tile.muted-tile { opacity: 0.65; }
 
 /* Team logo tiles */
-.tile.logo-tile::before { opacity: 1; background: var(--accent, var(--orange)); }
+.tile.logo-tile::before { opacity: 1; background: var(--accent, var(--lbj-orange)); }
 
 .tile.logo-tile img {
   aspect-ratio: 1 / 1;
@@ -331,7 +333,7 @@ main {
   position: relative;
   display: block;
   overflow: hidden;
-  border-radius: var(--radius);
+  border-radius: var(--lbj-radius);
   transition: transform var(--dur-base) var(--ease-spring-soft);
 }
 
@@ -347,9 +349,9 @@ main {
   aspect-ratio: 1 / 1;
   background-size: cover;
   background-position: center;
-  border-radius: var(--radius);
+  border-radius: var(--lbj-radius);
   display: block;
-  border: 1px solid var(--border);
+  border: 1px solid var(--lbj-border);
 }
 
 /* Materializes rather than hard-cutting in: opacity and scale animate
@@ -384,7 +386,7 @@ main {
   line-height: 0;
   max-width: 100%;
   overflow: hidden;
-  border-radius: var(--radius);
+  border-radius: var(--lbj-radius);
   transform: scale(0.92);
   transition: transform var(--dur-base) var(--ease-spring-soft);
   touch-action: pan-y;
@@ -406,7 +408,7 @@ main {
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  border-radius: var(--radius);
+  border-radius: var(--lbj-radius);
   cursor: default;
   transition: opacity 150ms ease;
 }
@@ -418,8 +420,8 @@ main {
   background: rgba(28, 34, 40, 0.55);
   backdrop-filter: blur(16px) saturate(180%);
   -webkit-backdrop-filter: blur(16px) saturate(180%);
-  border: 1px solid var(--border);
-  color: var(--cream);
+  border: 1px solid var(--lbj-border);
+  color: var(--lbj-text);
   width: 48px;
   height: 48px;
   border-radius: 50%;
@@ -438,13 +440,13 @@ main {
   .lb-nav { background: rgba(28, 34, 40, 0.85); }
 }
 
-.lb-nav:hover { background: rgba(207, 64, 2, 0.35); border-color: var(--orange); }
+.lb-nav:hover { background: rgba(207, 64, 2, 0.35); border-color: var(--lbj-orange); }
 .lb-nav:active { transform: translateY(-50%) scale(0.92); }
 .lb-prev { left: 1.5rem; }
 .lb-next { right: 1.5rem; }
 
 .album-description {
-  color: var(--cream);
+  color: var(--lbj-text);
   opacity: 0.85;
   text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
   font-size: 0.95rem;
@@ -458,7 +460,7 @@ main {
   color: #e8813a;
   background: rgba(207, 64, 2, 0.08);
   border: 1px solid rgba(207, 64, 2, 0.25);
-  border-radius: var(--radius);
+  border-radius: var(--lbj-radius);
   padding: 14px 18px;
   font-size: 0.9rem;
 }
@@ -466,9 +468,9 @@ main {
 /* ── admin.html ─────────────────────────────────── */
 .admin-card {
   position: relative;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  background: var(--lbj-bg-card);
+  border: 1px solid var(--lbj-border);
+  border-radius: var(--lbj-radius);
   overflow: hidden;
 }
 
@@ -489,7 +491,7 @@ main {
   border-radius: 50%;
   background: rgba(15, 18, 22, 0.5);
   border: 1px solid rgba(255, 255, 255, 0.25);
-  color: var(--cream);
+  color: var(--lbj-text);
   font-size: 0.8rem;
   line-height: 1;
   display: flex;
@@ -513,15 +515,15 @@ main {
   letter-spacing: 0.01em;
 }
 
-.admin-info .muted { color: var(--grey); font-weight: 400; }
+.admin-info .muted { color: var(--lbj-text-muted); font-weight: 400; }
 
 .btn-row { display: flex; flex-wrap: wrap; gap: 0.35rem; margin-bottom: 0.5rem; }
 
 .btn-row button {
   background: transparent;
-  border: 1px solid var(--border);
-  color: var(--cream);
-  border-radius: var(--radius);
+  border: 1px solid var(--lbj-border);
+  color: var(--lbj-text);
+  border-radius: var(--lbj-radius);
   padding: 0.3rem 0.55rem;
   font-family: 'Barlow Condensed', sans-serif;
   font-weight: 600;
@@ -532,17 +534,17 @@ main {
   transition: background var(--dur-fast) ease-out, transform var(--dur-fast) ease-out;
 }
 
-.btn-row button.active { background: var(--orange); border-color: var(--orange); }
-.btn-row button.clear { color: var(--grey); }
+.btn-row button.active { background: var(--lbj-orange); border-color: var(--lbj-orange); }
+.btn-row button.clear { color: var(--lbj-text-muted); }
 .btn-row button:active { transform: scale(0.94); }
 
 .team-select, .admin-field {
   display: block;
   width: 100%;
   background: rgba(15, 18, 22, 0.75);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--cream);
+  border: 1px solid var(--lbj-border);
+  border-radius: var(--lbj-radius);
+  color: var(--lbj-text);
   font-family: 'Barlow', sans-serif;
   font-size: 0.8rem;
   padding: 0.4rem 0.5rem;
@@ -550,7 +552,7 @@ main {
 }
 
 .admin-field { resize: vertical; }
-.admin-field::placeholder { color: var(--grey); }
+.admin-field::placeholder { color: var(--lbj-text-muted); }
 
 .auth-gate {
   max-width: 360px;
@@ -559,9 +561,9 @@ main {
 .auth-gate input {
   width: 100%;
   background: rgba(15, 18, 22, 0.75);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--cream);
+  border: 1px solid var(--lbj-border);
+  border-radius: var(--lbj-radius);
+  color: var(--lbj-text);
   font-family: 'Barlow', sans-serif;
   font-size: 0.95rem;
   padding: 0.7rem 0.85rem;
@@ -571,28 +573,28 @@ main {
 
 .auth-gate input:focus {
   outline: none;
-  border-color: var(--orange);
+  border-color: var(--lbj-orange);
 }
 
 #toolbar {
   position: sticky;
   top: 0;
-  background: var(--navy);
+  background: var(--lbj-bg);
   padding: 0.9rem 0;
   margin-bottom: 1rem;
   display: flex;
   gap: 1rem;
   align-items: center;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--lbj-border);
   z-index: 2;
 }
 
 .btn-primary {
-  background: var(--orange);
+  background: var(--lbj-orange);
   border: none;
   color: #fff;
   padding: 0.6rem 1.1rem;
-  border-radius: var(--radius);
+  border-radius: var(--lbj-radius);
   cursor: pointer;
   font-family: 'Barlow Condensed', sans-serif;
   font-weight: 700;
@@ -602,7 +604,7 @@ main {
   transition: background var(--dur-fast) ease-out, transform var(--dur-fast) ease-out;
 }
 
-.btn-primary:hover { background: var(--orange-dim); }
+.btn-primary:hover { background: var(--lbj-orange-dim); }
 .btn-primary:active { transform: scale(0.96); }
 
 .section-label {
@@ -610,7 +612,7 @@ main {
   font-size: 0.75rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--grey);
+  color: var(--lbj-text-muted);
 }
 
 #output {
@@ -619,9 +621,9 @@ main {
   height: 220px;
   margin-bottom: 1rem;
   background: rgba(15, 18, 22, 0.75);
-  color: var(--cream);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
+  color: var(--lbj-text);
+  border: 1px solid var(--lbj-border);
+  border-radius: var(--lbj-radius);
   padding: 0.85rem;
   font-family: monospace;
   font-size: 0.85rem;
@@ -635,7 +637,7 @@ main {
   text-align: center;
   font-size: 12px;
   letter-spacing: 0.05em;
-  color: var(--grey);
+  color: var(--lbj-text-muted);
   /* Sits directly on the texture with no card behind it — needs its own
      shadow since the overlay is a flat average and mottled bright patches
      can still wash out correctly-toned text locally. */
@@ -647,14 +649,14 @@ main {
   transition: color var(--dur-fast) ease-out;
 }
 
-.site-footer a:hover { color: var(--orange-light); }
+.site-footer a:hover { color: var(--lbj-orange-light); }
 
 .footer-disclaimer {
   margin: 16px auto 0;
   max-width: 480px;
   font-size: 10px;
   line-height: 1.6;
-  color: var(--grey-light);
+  color: var(--lbj-text-muted-light);
 }
 
 /* ── Accessibility: reduced motion / transparency / contrast ──────────── */
@@ -682,8 +684,8 @@ main {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
-  .site-header { background: var(--navy); }
-  .page-title-block { background: var(--card); }
+  .site-header { background: var(--lbj-bg); }
+  .page-title-block { background: var(--lbj-bg-card); }
   .lb-nav { background: rgba(28, 34, 40, 0.9); }
 }
 
@@ -693,6 +695,6 @@ main {
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
   }
-  .site-header { background: var(--navy); }
-  .page-title-block { background: var(--card); }
+  .site-header { background: var(--lbj-bg); }
+  .page-title-block { background: var(--lbj-bg-card); }
 }
