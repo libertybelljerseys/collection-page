@@ -24,6 +24,7 @@ for (const { id, title, cover } of albums) {
     .replace(/(property="og:title" content=").*?(")/, `$1${escapeAttr(pageTitle)}$2`)
     .replace(/(property="og:description" content=").*?(")/, `$1${escapeAttr(desc)}$2`)
     .replace(/(property="og:image" content=").*?(")/, `$1${escapeAttr(cover)}$2`)
+    .replace(/\s*<meta property="og:image:(?:width|height)" content="\d+">\n/g, '')
     .replace(/(name="twitter:title" content=").*?(")/, `$1${escapeAttr(pageTitle)}$2`)
     .replace(/(name="twitter:description" content=").*?(")/, `$1${escapeAttr(desc)}$2`)
     .replace(/(name="twitter:image" content=").*?(")/, `$1${escapeAttr(cover)}$2`)
