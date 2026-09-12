@@ -2,16 +2,15 @@
   "title": "troch_oree",
   "photos": [
     {
-      "id": "troch-oree-01",
-      "title": "",
-      "thumb": "https://img.libertybelljerseys.com/albums/troch-oree/thumb/01.jpg",
-      "full": "https://img.libertybelljerseys.com/albums/troch-oree/full/01.jpg"
-    },
-    {
       "id": "troch-oree-02",
       "title": "",
       "thumb": "https://img.libertybelljerseys.com/albums/troch-oree/thumb/02.jpg",
       "full": "https://img.libertybelljerseys.com/albums/troch-oree/full/02.jpg"
+    },    {
+      "id": "troch-oree-01",
+      "title": "",
+      "thumb": "https://img.libertybelljerseys.com/albums/troch-oree/thumb/01.jpg",
+      "full": "https://img.libertybelljerseys.com/albums/troch-oree/full/01.jpg"
     },
     {
       "id": "troch-oree-03",
