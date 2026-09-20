@@ -264,12 +264,6 @@
     "cover": "https://img.libertybelljerseys.com/albums/car-2023-stadium-series/cover.jpg"
   },
   {
-    "id": "car-2025-present-away",
-    "title": "2025 Away Nikishin",
-    "count": 4,
-    "cover": "https://img.libertybelljerseys.com/albums/car-2025-present-away/cover.jpg"
-  },
-  {
     "id": "car-2016-home-gw",
     "title": "Pesce 2016-17 Set 2 Home",
     "count": 14,
@@ -622,5 +616,11 @@
     "title": "troch_oree",
     "count": 7,
     "cover": "https://img.libertybelljerseys.com/albums/troch-oree/cover.jpg"
+  },
+  {
+    "id": "car-2025-present-away",
+    "title": "car-2025-present-away",
+    "count": 4,
+    "cover": "https://img.libertybelljerseys.com/albums/car-2025-present-away/cover.jpg"
   }
 ]
