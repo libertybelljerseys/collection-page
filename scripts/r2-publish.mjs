@@ -15,6 +15,10 @@
 //     in filename order. Full-resolution photos are uploaded as-is; only
 //     the thumb is generated.
 //
+//   node scripts/r2-publish.mjs --download <album-id-or-url> <dest-dir>
+//     Downloads an album's full-size photos into <dest-dir>/<Album Title>/.
+//     Fetches the public URLs, so it needs no wrangler auth or env vars.
+//
 //   node scripts/r2-publish.mjs --delete <album-id-or-url>
 //     Deletes an album: removes its photos/cover from R2, drops its entry
 //     from data/albums.json, and deletes data/albums/<id>.json. Accepts a
@@ -42,7 +46,7 @@ const PUBLIC_BASE = process.env.R2_PUBLIC_BASE
   ?.replace(/^(?!https?:\/\/)/, 'https://');
 const THUMB_WIDTH = 640;
 
-if (!BUCKET || !PUBLIC_BASE) {
+if ((!BUCKET || !PUBLIC_BASE) && process.argv[2] !== '--download') {
   console.error('Set R2_BUCKET and R2_PUBLIC_BASE (see comment at top of this script).');
   process.exit(1);
 }
@@ -219,6 +223,22 @@ function extractId(idOrUrl) {
   return m ? decodeURIComponent(m[1]) : idOrUrl;
 }
 
+async function downloadAlbum(idOrUrl, destRoot) {
+  const id = extractId(idOrUrl);
+  const detail = JSON.parse(await readFile(`data/albums/${id}.json`, 'utf8'));
+  // Titles can contain "/" (e.g. "2021/22"), which would nest directories.
+  const dir = path.join(destRoot, (detail.title || id).replace(/[/\\:]/g, '-'));
+  await mkdir(dir, { recursive: true });
+  for (let i = 0; i < detail.photos.length; i += 1) {
+    const url = detail.photos[i].full;
+    progress(i + 1, detail.photos.length, `downloading ${url}`);
+    const res = await fetch(url);
+    if (!res.ok) throw new Error(`${res.status} fetching ${url}`);
+    await writeFile(path.join(dir, path.basename(new URL(url).pathname)), Buffer.from(await res.arrayBuffer()));
+  }
+  console.log(`✓ Downloaded ${detail.photos.length} photos → ${dir}`);
+}
+
 async function deleteAlbum(idOrUrl) {
   const id = extractId(idOrUrl);
 
@@ -266,6 +286,13 @@ if (mode === '--new') {
     process.exit(1);
   }
   await publishNew(title, folder);
+} else if (mode === '--download') {
+  const [idOrUrl, dest] = rest;
+  if (!idOrUrl || !dest) {
+    console.error('Usage: node scripts/r2-publish.mjs --download <album-id-or-url> <dest-dir>');
+    process.exit(1);
+  }
+  await downloadAlbum(idOrUrl, dest);
 } else if (mode === '--delete') {
   const [idOrUrl] = rest;
   if (!idOrUrl) {
@@ -278,6 +305,6 @@ if (mode === '--new') {
 } else if (mode === '--migrate' || !mode) {
   await bulkMigrate();
 } else {
-  console.error('Usage:\n  node scripts/r2-publish.mjs --migrate\n  node scripts/r2-publish.mjs --new "<Title>" <folder-of-photos>\n  node scripts/r2-publish.mjs --delete <album-id-or-url>\n  node scripts/r2-publish.mjs --fix-covers');
+  console.error('Usage:\n  node scripts/r2-publish.mjs --migrate\n  node scripts/r2-publish.mjs --new "<Title>" <folder-of-photos>\n  node scripts/r2-publish.mjs --download <album-id-or-url> <dest-dir>\n  node scripts/r2-publish.mjs --delete <album-id-or-url>\n  node scripts/r2-publish.mjs --fix-covers');
   process.exit(1);
 }

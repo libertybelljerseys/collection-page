@@ -83,6 +83,15 @@ npx wrangler secret put ADMIN_PASSWORD    # once, or to rotate it
 5. Commit the updated `data/albums.json` and `data/albums/<slug>.json`,
    then tag the new album via `/admin.html` as in Setup step 2, and push.
 
+## Downloading an album
+
+`node scripts/r2-publish.mjs --download <album-id-or-url> <dest-dir>` —
+accepts the same id/URL forms as `--delete`. Saves the album's full-size
+photos (`01.jpg`, `02.jpg`, …) into `<dest-dir>/<Album Title>/`, creating it
+if needed (`/`, `\`, `:` in the title become `-`). Thumbs and the cover are
+skipped. It fetches the public image URLs, so no env vars or `wrangler` auth
+are needed, and nothing in the repo changes.
+
 ## Deleting an album
 
 1. Same env vars/auth as above (`R2_BUCKET`, `R2_PUBLIC_BASE`, `wrangler`
